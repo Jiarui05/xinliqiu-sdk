@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:"
+    />
+    <title>同一时间 · 转录对比</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        margin: 0;
+        color: #222936;
+        background: #f6f7fa;
+        font:
+          15px/1.8 -apple-system,
+          BlinkMacSystemFont,
+          "PingFang SC",
+          sans-serif;
+      }
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+      button,
+      select,
+      input {
+        border: 1px solid #dde1e9;
+        border-radius: 9px;
+        background: white;
+        padding: 7px 12px;
+        color: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:hover {
+        background: #edf1fc;
+      }
+      button:focus-visible,
+      select:focus-visible,
+      input:focus-visible {
+        outline: 3px solid #a4b6ef;
+        outline-offset: 2px;
+      }
+      header {
+        flex-shrink: 0;
+        width: 100%;
+        max-width: 1420px;
+        margin: auto;
+        padding: 28px 34px 16px;
+      }
+      .eyebrow {
+        color: #697286;
+        font-size: 11px;
+        letter-spacing: 2px;
+      }
+      h1 {
+        margin: 2px 0;
+        font-size: 27px;
+        letter-spacing: -0.7px;
+        font-weight: 650;
+      }
+      .intro {
+        color: #768094;
+        font-size: 13px;
+        margin: 4px 0;
+      }
+      .topline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+      }
+      .target {
+        padding: 9px 14px;
+        border-radius: 10px;
+        background: #eaf0fe;
+        color: #3f5da3;
+        font-size: 13px;
+      }
+      .toolbar {
+        margin-top: 17px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .toolbar label {
+        font-size: 13px;
+        color: #697286;
+      }
+      .toolbar input[type="time"] {
+        width: 130px;
+      }
+      .toolbar .spacer {
+        flex: 1;
+      }
+      .badge {
+        display: inline-flex;
+        border-radius: 5px;
+        padding: 0 7px;
+        font-size: 11px;
+        line-height: 20px;
+        background: #edf0f5;
+        color: #687284;
+      }
+      .badge.me {
+        background: #f5e5ee;
+        color: #8f3561;
+      }
+      main {
+        flex: 1;
+        min-height: 0;
+        width: 100%;
+        max-width: 1420px;
+        margin: auto;
+        padding: 0 24px;
+      }
+      .panel {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        background: white;
+        border: 1px solid #e0e4eb;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 24px #27324e05;
+      }
+      .columns,
+      .row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 88px minmax(0, 1fr);
+      }
+      .columns {
+        flex-shrink: 0;
+        background: #fbfcfe;
+        border-bottom: 1px solid #e7eaf0;
+      }
+      .column-head {
+        padding: 14px 24px;
+      }
+      .column-head select {
+        font-weight: 600;
+        min-width: 210px;
+      }
+      .meta {
+        font-size: 12px;
+        color: #81899a;
+        margin-top: 5px;
+      }
+      .axis-head {
+        text-align: center;
+        align-self: center;
+        font-size: 11px;
+        color: #8a91a0;
+      }
+      .scroll {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-gutter: stable;
+      }
+      .row {
+        border-bottom: 1px solid #eef0f4;
+        min-height: 65px;
+        scroll-margin-top: 15px;
+      }
+      .cell {
+        padding: 17px 25px;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        line-height: 1.95;
+        font-size: 15px;
+        letter-spacing: 0;
+      }
+      .cell p {
+        margin: 0 0 7px;
+      }
+      .cell p:last-child {
+        margin: 0;
+      }
+      .cell .badge {
+        margin-right: 7px;
+        vertical-align: 2px;
+      }
+      .time {
+        padding: 19px 3px;
+        text-align: center;
+        font:
+          11px/1.8 ui-monospace,
+          SFMono-Regular,
+          monospace;
+        background: #fbfcfe;
+        border-left: 1px solid #f1f2f6;
+        border-right: 1px solid #f1f2f6;
+        color: #949baa;
+      }
+      .time small {
+        font:
+          10px/1.6 -apple-system,
+          sans-serif;
+        display: block;
+        color: #bd8b3d;
+      }
+      .empty {
+        color: #afb5c0;
+        font-size: 12px;
+      }
+      .row.different .cell {
+        background: #fffdf8;
+      }
+      .row.known {
+        box-shadow:
+          inset 3px 0 #d6a55c,
+          inset -3px 0 #d6a55c;
+      }
+      .row.flash .cell {
+        animation: focus 1.2s ease-out;
+      }
+      @keyframes focus {
+        from {
+          background: #fff0cc;
+        }
+        to {
+          background: #fffdf8;
+        }
+      }
+      .bottom {
+        flex-shrink: 0;
+        width: 100%;
+        max-width: 1420px;
+        margin: 8px auto;
+        padding: 0 34px;
+        color: #8a92a1;
+        font-size: 11px;
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      #empty-state {
+        text-align: center;
+        padding: 50px;
+        color: #8a92a1;
+      }
+      #current {
+        color: #536dba;
+        font-variant-numeric: tabular-nums;
+      }
+      .error {
+        padding: 30px;
+        color: #a54848;
+      }
+      @media (max-width: 760px) {
+        header {
+          padding: 18px 16px 12px;
+        }
+        h1 {
+          font-size: 21px;
+        }
+        .topline {
+          display: block;
+        }
+        .target {
+          margin-top: 8px;
+          display: inline-block;
+        }
+        main {
+          padding: 0 8px;
+        }
+        .columns,
+        .row {
+          grid-template-columns: minmax(0, 1fr) 60px minmax(0, 1fr);
+        }
+        .column-head {
+          padding: 9px;
+        }
+        .column-head select {
+          min-width: 0;
+          width: 100%;
+          font-size: 12px;
+        }
+        .cell {
+          padding: 12px 10px;
+          font-size: 13px;
+        }
+        .bottom {
+          padding: 0 14px;
+        }
+        .toolbar {
+          gap: 8px;
+        }
+        .meta {
+          font-size: 10px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .row.flash .cell {
+          animation: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="topline">
+        <div>
+          <div class="eyebrow">音频长度实验</div>
+          <h1>同一段声音，不同长度的输入</h1>
+          <p class="intro">
+            2026 年 11 月 12 日 · 同一个声纹、同一个模型 ·
+            按实际录音时间对齐；合并输入不含录音间空档
+          </p>
+        </div>
+        <button class="target" id="target">定位你确认的那句话 ↗</button>
+      </div>
+      <div class="toolbar">
+        <label
+          >跳到 <input id="seek" type="time" step="1" value="11:34:53" /></label
+        ><button id="go">定位</button
+        ><label><input id="diff" type="checkbox" /> 只看文字不同的时间段</label
+        ><span class="spacer"></span><span class="badge me">我 · 声纹匹配</span
+        ><span class="badge">匿名说话人</span>
+      </div>
+    </header>
+    <main>
+      <div class="panel">
+        <div class="columns">
+          <div class="column-head">
+            <select id="left" aria-label="左侧转录版本"></select>
+            <div class="meta" id="left-meta"></div>
+          </div>
+          <div class="axis-head">同一时间<br /><span id="current">—</span></div>
+          <div class="column-head">
+            <select id="right" aria-label="右侧转录版本"></select>
+            <div class="meta" id="right-meta"></div>
+          </div>
+        </div>
+        <div
+          class="scroll"
+          id="scroll"
+          tabindex="0"
+          aria-label="按实际时间同步滚动的转录对照"
+        ></div>
+      </div>
+    </main>
+    <footer class="bottom">
+      <span
+        >每行对齐同一 15
+        秒时间窗，无录音空档折叠；浅暖底表示文字不同，不代表识别错误。</span
+      ><span>本地文件 · 无外部请求</span>
+    </footer>
+    <script id="data" type="application/json">
+      __COMPARISON_DATA__
+    </script>
+    <script>
+      /** Render only escaped text from the private, normalized ASR artifact; never load remote resources. */
+      const data = JSON.parse(document.getElementById("data").textContent),
+        $ = (id) => document.getElementById(id),
+        STEP = 15000;
+      const time = (ms) =>
+        new Intl.DateTimeFormat("zh-CN", {
+          timeZone: "Asia/Shanghai",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        }).format(ms);
+      const normalized = (s) =>
+        s
+          .normalize("NFKC")
+          .replace(/[\p{P}\p{Z}\s]/gu, "")
+          .toLowerCase();
+      const first = Math.floor(data.from / STEP) * STEP,
+        last = Math.ceil(data.to / STEP) * STEP;
+      for (const key of ["left", "right"])
+        for (const [index, version] of data.versions.entries()) {
+          const option = document.createElement("option");
+          option.value = index;
+          option.textContent = version.label;
+          $(key).append(option);
+        }
+      $("left").value = "0";
+      $("right").value = String(data.versions.length - 1);
+      const buckets = data.versions.map((v) => {
+        const map = new Map();
+        for (const word of v.words) {
+          const t = Math.floor(word[0] / STEP) * STEP;
+          if (!map.has(t)) map.set(t, []);
+          map.get(t).push(word);
+        }
+        return map;
+      });
+      /** Both columns occupy the same CSS grid row, so text length cannot create independent scroll drift. */
+      function cell(words, version, t) {
+        const el = document.createElement("div");
+        el.className = "cell";
+        if (!words.length) {
+          el.classList.add("empty");
+          el.textContent =
+            t < version.from || t >= version.to
+              ? "未纳入此组测试"
+              : version.coverage.some(([a, b]) => a < t + STEP && b > t)
+                ? "这段没有识别文字"
+                : "这段没有录音";
+          return el;
+        }
+        let p, previous;
+        for (const w of words) {
+          const who = w[4] ? "我" : w[3] || "未区分";
+          if (who !== previous) {
+            p = document.createElement("p");
+            const badge = document.createElement("span");
+            badge.className = "badge" + (w[4] ? " me" : "");
+            badge.textContent = w[4] ? "我" : "说话人 " + who.split(":").at(-1);
+            if (!w[3]) badge.textContent = "未区分";
+            p.append(badge);
+            el.append(p);
+            previous = who;
+          }
+          const span = document.createElement("span");
+          span.textContent = w[2];
+          span.title = time(w[0]) + " — " + time(w[1]);
+          p.append(span);
+        }
+        return el;
+      }
+      /** Preserve the visible timestamp when switching experimental versions, rather than preserving scroll percentage. */
+      function currentTime() {
+        const top = $("scroll").getBoundingClientRect().top;
+        const rows = [...$("scroll").querySelectorAll("[data-time]")];
+        return (
+          Number(
+            rows.find((r) => r.getBoundingClientRect().bottom > top + 1)
+              ?.dataset.time,
+          ) || first
+        );
+      }
+      function jump(t, flash = false) {
+        const rows = [...$("scroll").querySelectorAll("[data-time]")];
+        const row =
+          rows.find(
+            (r) => Number(r.dataset.time) >= Math.floor(t / STEP) * STEP,
+          ) || rows.at(-1);
+        if (!row) return;
+        $("scroll").scrollTop +=
+          row.getBoundingClientRect().top -
+          $("scroll").getBoundingClientRect().top +
+          1;
+        if (flash) {
+          row.classList.remove("flash");
+          void row.offsetWidth;
+          row.classList.add("flash");
+        }
+        updateClock();
+      }
+      function render() {
+        const anchor = currentTime(),
+          li = Number($("left").value),
+          ri = Number($("right").value),
+          lv = data.versions[li],
+          rv = data.versions[ri];
+        for (const [side, v] of [
+          ["left", lv],
+          ["right", rv],
+        ])
+          $(side + "-meta").textContent =
+            `${v === data.versions[0] ? "每批约 10 分钟" : "有效音频 " + v.minutes.toFixed(1) + " 分钟"} · ${time(v.from)}—${time(v.to)} · ${v.words.reduce((n, w) => n + Array.from(w[2]).length, 0).toLocaleString()} 字`;
+        const fragment = document.createDocumentFragment();
+        for (let t = first; t < last; t += STEP) {
+          if (
+            !data.versions.some((v) =>
+              v.coverage.some(([a, b]) => a < t + STEP && b > t),
+            )
+          ) {
+            const gapStart = t;
+            while (
+              t + STEP < last &&
+              !data.versions.some((v) =>
+                v.coverage.some(([a, b]) => a < t + 2 * STEP && b > t + STEP),
+              )
+            )
+              t += STEP;
+            if (!$("diff").checked) {
+              const row = document.createElement("section");
+              row.className = "row gap";
+              row.dataset.time = gapStart;
+              const axis = document.createElement("div");
+              axis.className = "time";
+              axis.textContent = time(gapStart) + " — " + time(t + STEP);
+              const left = document.createElement("div");
+              left.className = "cell empty";
+              left.textContent =
+                "无录音空档 · " +
+                Math.round((t + STEP - gapStart) / 60000) +
+                " 分钟";
+              row.append(left, axis, left.cloneNode(true));
+              fragment.append(row);
+            }
+            continue;
+          }
+          const left = buckets[li].get(t) || [],
+            right = buckets[ri].get(t) || [];
+          const different =
+            normalized(left.map((w) => w[2]).join("")) !==
+            normalized(right.map((w) => w[2]).join(""));
+          if ($("diff").checked && !different) continue;
+          const row = document.createElement("section");
+          row.className =
+            "row" +
+            (different ? " different" : "") +
+            (t <= data.target.fromMS && t + STEP > data.target.fromMS
+              ? " known"
+              : "");
+          row.dataset.time = t;
+          const axis = document.createElement("div");
+          axis.className = "time";
+          axis.textContent = time(t);
+          if (row.classList.contains("known")) {
+            const note = document.createElement("small");
+            note.textContent = "含你确认的句子";
+            axis.append(note);
+          }
+          row.append(cell(left, lv, t), axis, cell(right, rv, t));
+          fragment.append(row);
+        }
+        $("scroll").replaceChildren(fragment);
+        if (!$("scroll").children.length) {
+          const empty = document.createElement("div");
+          empty.id = "empty-state";
+          empty.textContent = "所选版本在这个范围内没有文字差异。";
+          $("scroll").append(empty);
+        }
+        jump(anchor);
+      }
+      function updateClock() {
+        $("current").textContent = time(currentTime());
+      }
+      $("scroll").addEventListener("scroll", updateClock, { passive: true });
+      for (const id of ["left", "right", "diff"])
+        $(id).addEventListener("change", render);
+      $("go").onclick = () => {
+        const value = $("seek").value;
+        if (value)
+          jump(
+            Date.parse(
+              "2026-11-12T" +
+                value +
+                (value.length === 5 ? ":00" : "") +
+                "+08:00",
+            ),
+            true,
+          );
+      };
+      $("target").onclick = () => {
+        if ($("diff").checked) {
+          $("diff").checked = false;
+          render();
+        }
+        jump(data.target.fromMS, true);
+      };
+      render();
+      requestAnimationFrame(() => jump(data.target.fromMS, true));
+    </script>
+  </body>
+</html>

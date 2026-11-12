@@ -1,0 +1,13 @@
+# Use an allowlist so private configuration and local recordings cannot enter builds.
+**
+!Dockerfile
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!tsconfig.json
+!orval.config.ts
+!openapi.json
+!src/**
+!scripts/**
+!test/**
+!skill/**

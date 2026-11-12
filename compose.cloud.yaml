@@ -1,0 +1,24 @@
+# Build the API and CLI assets together from the deployment branch; data survives replacement.
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    mem_limit: 384m
+    cpus: 0.5
+    environment:
+      XQ_HOST: 0.0.0.0
+      XQ_DATA_DIR: /data
+      XQ_WORKER_CONCURRENCY: 1
+      NODE_OPTIONS: --max-old-space-size=256
+    volumes:
+      - transcripts:/data
+    networks:
+      - dokploy-network
+volumes:
+  transcripts:
+    name: xinliqiu-cloud-transcripts
+networks:
+  dokploy-network:
+    external: true

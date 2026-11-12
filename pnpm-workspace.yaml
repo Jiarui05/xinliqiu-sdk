@@ -1,0 +1,5 @@
+packages:
+  - .
+allowBuilds:
+  esbuild: true
+  tos-crc64-js: false
