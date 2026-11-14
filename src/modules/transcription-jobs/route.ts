@@ -1,6 +1,5 @@
 /** jobs HTTP routes: parse requests and delegate to existing services/repositories. */
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
-import { randomUUID } from "node:crypto";
 import { Repository } from "../../infrastructure/database.js";
 import {
   type Env,
@@ -10,7 +9,7 @@ import {
   errors,
 } from "../../http/common.js";
 import { submitJobs, SubmissionError } from "./service.js";
-import { Batch, Job } from "../../contracts.js";
+import { Batch, Job } from "./schema.js";
 /** Register the module without opening listeners or performing provider requests. */
 export function register(
   app: OpenAPIHono<Env>,

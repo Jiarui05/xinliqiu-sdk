@@ -2,6 +2,7 @@
 import { DatabaseSync } from "node:sqlite";
 import { AuthRepository } from "../modules/auth/repository.js";
 import { JobRepository } from "../modules/transcription-jobs/repository.js";
+import { MirrorRepository } from "../modules/transcripts/mirror-repository.js";
 import { TranscriptRepository } from "../modules/transcripts/repository.js";
 export type { StoredJob } from "../modules/transcription-jobs/repository.js";
 /** Own a single database connection and inject it into business-specific repositories. */
@@ -10,6 +11,7 @@ export class Repository {
   readonly auth: AuthRepository;
   readonly jobs: JobRepository;
   readonly transcripts: TranscriptRepository;
+  readonly mirrors: MirrorRepository;
   constructor(path: string) {
     this.db = new DatabaseSync(path);
     this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
@@ -18,6 +20,7 @@ export class Repository {
       CREATE TABLE IF NOT EXISTS words(seq INTEGER PRIMARY KEY AUTOINCREMENT,owner TEXT NOT NULL,source_id TEXT NOT NULL,recorded_at INTEGER NOT NULL,begin_at INTEGER NOT NULL,end_at INTEGER NOT NULL,chars INTEGER NOT NULL,text TEXT NOT NULL,speaker TEXT,emotion TEXT,data TEXT NOT NULL);
       CREATE INDEX IF NOT EXISTS words_owner_time ON words(owner,begin_at,seq);
 `);
+    this.mirrors = new MirrorRepository(this.db);
     this.auth = new AuthRepository(this.db);
     this.jobs = new JobRepository(this.db);
     this.transcripts = new TranscriptRepository(this.db);

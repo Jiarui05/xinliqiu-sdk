@@ -7,7 +7,6 @@ import type { ServiceConfig } from "./domain.js";
 import { DoubaoVoiceprints } from "../voice-identity/enrollment.js";
 import type { VoiceReferences } from "../voice-identity/service.js";
 import type { VoiceReference } from "../voice-identity/domain.js";
-export { ServiceInput } from "./schema.js";
 export type { ServiceConfig } from "./domain.js";
 const Field = (
   key: string,

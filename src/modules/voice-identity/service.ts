@@ -3,7 +3,6 @@ import { createHash } from "node:crypto";
 import { VoiceRepository } from "./repository.js";
 import type { VoiceReference, ReferenceStorage } from "./domain.js";
 export type { VoiceReference, ReferenceStorage } from "./domain.js";
-export { VoiceReferenceInput, VoiceReferenceView } from "./schema.js";
 export { cosReferenceStorage } from "../../infrastructure/storage/cos.js";
 /** Validate actual RIFF chunks and PCM duration before storing a single-channel reference. */
 export function validateReference(audio: Buffer): number {

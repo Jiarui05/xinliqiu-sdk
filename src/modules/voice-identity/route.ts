@@ -1,6 +1,5 @@
 /** services HTTP routes: parse requests and delegate to existing services/repositories. */
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
-import { randomUUID } from "node:crypto";
 import { Repository } from "../../infrastructure/database.js";
 import {
   type Env,
@@ -9,10 +8,7 @@ import {
   response,
   errors,
 } from "../../http/common.js";
-import {
-  VoiceReferenceInput,
-  VoiceReferenceView,
-} from "../voice-identity/service.js";
+import { VoiceReferenceInput, VoiceReferenceView } from "./schema.js";
 /** Register reference-audio HTTP transport only. */
 export function register(
   app: OpenAPIHono<Env>,

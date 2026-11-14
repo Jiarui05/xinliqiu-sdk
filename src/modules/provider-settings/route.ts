@@ -1,6 +1,5 @@
 /** services HTTP routes: parse requests and delegate to existing services/repositories. */
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
-import { randomUUID } from "node:crypto";
 import { Repository } from "../../infrastructure/database.js";
 import {
   type Env,
@@ -9,36 +8,13 @@ import {
   response,
   errors,
 } from "../../http/common.js";
-import {
-  VoiceReferenceInput,
-  VoiceReferenceView,
-} from "../voice-identity/service.js";
-import { ServiceInput } from "./service.js";
+import { ServiceInput, configView, field } from "./schema.js";
 /** Register the module without opening listeners or performing provider requests. */
 export function register(
   app: OpenAPIHono<Env>,
   repo: Repository,
   options: Options,
 ) {
-  const configView = z.object({
-    id: z.string(),
-    provider: z.enum(["qwen", "tencent", "doubao"]),
-    model: z.string(),
-    credentials: z.record(z.string(), z.string()),
-    secrets: z.array(z.string()),
-    voiceIdentity: z.object({
-      enabled: z.boolean(),
-      referenceId: z.string().optional(),
-      durationSeconds: z.number().optional(),
-    }),
-  });
-  const field = z.object({
-    key: z.string(),
-    label: z.string(),
-    secret: z.boolean(),
-    required: z.boolean(),
-    defaultValue: z.string(),
-  });
   app.openapi(
     createRoute({
       method: "get",

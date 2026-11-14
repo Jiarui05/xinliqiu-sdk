@@ -10,7 +10,7 @@ import { join, dirname } from "node:path";
 import { parseArgs } from "node:util";
 import { createHash } from "node:crypto";
 import YAML from "yaml";
-import { MirrorBatch } from "../src/modules/transcripts/mirror.js";
+import { MirrorBatch } from "../src/modules/transcripts/mirror-schema.js";
 import { mirrorTranscripts } from "../src/generated/client.js";
 import { Client } from "../src/cli/client.js";
 const { values } = parseArgs({

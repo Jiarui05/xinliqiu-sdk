@@ -1,9 +1,7 @@
 /** Completed text replication delegates atomic writes to its owner-scoped repository. */
 import { createHash } from "node:crypto";
 import type { Repository } from "../../infrastructure/database.js";
-import { MirrorRepository } from "./mirror-repository.js";
 import type { MirroredTranscript } from "./domain.js";
-export { MirrorBatch } from "./mirror-schema.js";
 /** No provider request or audio upload can be scheduled through text replication. */
 export function mirrorTranscripts(
   repo: Repository,
@@ -14,5 +12,5 @@ export function mirrorTranscripts(
     ...source,
     revision: createHash("sha256").update(JSON.stringify(source)).digest("hex"),
   }));
-  return new MirrorRepository(repo.db).replace(owner, revisions);
+  return repo.mirrors.replace(owner, revisions);
 }
