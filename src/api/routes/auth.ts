@@ -7,7 +7,7 @@ import {
   security,
   response,
   errors,
-} from "../../http/common.js";
+} from "../common.js";
 
 /** Register the module without opening listeners or performing provider requests. */
 export function register(

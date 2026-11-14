@@ -7,8 +7,12 @@ import {
   security,
   response,
   errors,
-} from "../../http/common.js";
-import { ServiceInput, configView, field } from "./schema.js";
+} from "../common.js";
+import {
+  ServiceInput,
+  configView,
+  field,
+} from "../../modules/provider-settings/schema.js";
 /** Register the module without opening listeners or performing provider requests. */
 export function register(
   app: OpenAPIHono<Env>,

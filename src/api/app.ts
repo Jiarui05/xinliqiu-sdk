@@ -4,17 +4,17 @@ import { HTTPException } from "hono/http-exception";
 import { bodyLimit } from "hono/body-limit";
 import { Scalar } from "@scalar/hono-api-reference";
 import { randomUUID } from "node:crypto";
-import { Repository } from "./infrastructure/database.js";
-import { cliRelease } from "./http/cli-release.js";
-import { type Env, type Options } from "./http/common.js";
-export type { Options } from "./http/common.js";
-import { register as registerVoices } from "./modules/voice-identity/route.js";
-import { DomainError } from "./shared/errors.js";
-import { register as registerServices } from "./modules/provider-settings/route.js";
-import { register as registerAuth } from "./modules/auth/route.js";
-import { register as registerTranscripts } from "./modules/transcripts/route.js";
-import { register as registerJobs } from "./modules/transcription-jobs/route.js";
-import { register as registerMirror } from "./modules/transcripts/mirror-route.js";
+import { Repository } from "../infrastructure/database.js";
+import { cliRelease } from "./cli-release.js";
+import { type Env, type Options } from "./common.js";
+export type { Options } from "./common.js";
+import { register as registerVoices } from "./routes/voice-identity.js";
+import { DomainError } from "../shared/errors.js";
+import { register as registerServices } from "./routes/provider-settings.js";
+import { register as registerAuth } from "./routes/auth.js";
+import { register as registerTranscripts } from "./routes/transcripts.js";
+import { register as registerJobs } from "./routes/jobs.js";
+import { register as registerMirror } from "./routes/mirror.js";
 /** Build without starting listeners or contacting a provider; tests inject their own durable repository. */
 export function createApp(repo: Repository, options: Options) {
   const app = new OpenAPIHono<Env>({

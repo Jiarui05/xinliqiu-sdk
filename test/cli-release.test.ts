@@ -15,7 +15,7 @@ import {
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { Repository } from "../src/infrastructure/database.js";
-import { createApp } from "../src/app.js";
+import { createApp } from "../src/api/app.js";
 const exec = promisify(execFile);
 test("portable install, authenticated read, schema, skill, update and checksum rollback", async () => {
   const repo = new Repository(":memory:"),

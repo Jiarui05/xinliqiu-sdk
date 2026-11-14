@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { Repository } from "../src/infrastructure/database.js";
 import { tick } from "../src/modules/transcription-jobs/worker.js";
-import { createApp } from "../src/app.js";
+import { createApp } from "../src/api/app.js";
 /** Walk owned source only, never user data or dependencies. */
 function files(root: string): string[] {
   return readdirSync(root, { withFileTypes: true }).flatMap((e) =>
@@ -14,12 +14,19 @@ function files(root: string): string[] {
   );
 }
 test("repositories/domain/services do not depend on HTTP and routes contain no SQL", () => {
+  for (const path of files("src/api/routes")) {
+    assert.doesNotMatch(
+      readFileSync(path, "utf8"),
+      /\.db\.(?:prepare|exec)\(/,
+      path,
+    );
+  }
   for (const path of files("src/modules").filter((p) => p.endsWith(".ts"))) {
     const code = readFileSync(path, "utf8");
     if (/(?:repository|domain|service)\.ts$/.test(path))
       assert.doesNotMatch(
         code,
-        /(?:from|import)\s*["'](?:@hono|hono|.*\/http\/)/,
+        /(?:from|import)\s*["'](?:@hono|hono|.*\/(?:http|api)\/)/,
         path,
       );
     if (/(?:route|service)\.ts$/.test(path))

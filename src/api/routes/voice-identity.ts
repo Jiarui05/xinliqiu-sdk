@@ -7,8 +7,11 @@ import {
   security,
   response,
   errors,
-} from "../../http/common.js";
-import { VoiceReferenceInput, VoiceReferenceView } from "./schema.js";
+} from "../common.js";
+import {
+  VoiceReferenceInput,
+  VoiceReferenceView,
+} from "../../modules/voice-identity/schema.js";
 /** Register reference-audio HTTP transport only. */
 export function register(
   app: OpenAPIHono<Env>,

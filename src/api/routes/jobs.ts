@@ -7,9 +7,12 @@ import {
   security,
   response,
   errors,
-} from "../../http/common.js";
-import { submitJobs, SubmissionError } from "./service.js";
-import { Batch, Job } from "./schema.js";
+} from "../common.js";
+import {
+  submitJobs,
+  SubmissionError,
+} from "../../modules/transcription-jobs/service.js";
+import { Batch, Job } from "../../modules/transcription-jobs/schema.js";
 /** Register the module without opening listeners or performing provider requests. */
 export function register(
   app: OpenAPIHono<Env>,

@@ -2,17 +2,19 @@
 
 ## 依赖方向
 
-HTTP route → 业务 service → repository / provider port。
+`api/routes/` → `modules/` 中的业务 service → repository / provider port。
+
+`api/` 统一放置 Hono 应用入口、路由注册、公共响应和 HTTP 类型、发行文件入口；`modules/` 只组织业务校验、领域类型、业务流程、持久化与供应商适配。没有平行的 `http/` 或空的 `services/` 入口。
 
 业务层不依赖 Hono Context 或 HTTP 状态码；数据库层使用领域类型，不导入 HTTP schema。HTTP 层负责认证身份、Zod 校验、响应类型和状态码映射。
 
-`app.ts` 是 HTTP 组合根；`server.ts` 负责进程、依赖组装和 worker 生命周期。`infrastructure/database.ts` 维护既有 SQLite 连接、事务入口和各模块 repository，不再集中所有业务 SQL。
+`api/app.ts` 是 HTTP 组合根；`server.ts` 负责进程、依赖组装和 worker 生命周期。`infrastructure/database.ts` 维护既有 SQLite 连接、事务入口和各模块 repository，不再集中所有业务 SQL。
 
 ## 模块职责
 
 | 模块 | 职责 |
 |---|---|
-| auth | 永久 root Token 摘要、鉴权、主动撤销与 HTTP 接口 |
+| auth | 永久 root Token 摘要、鉴权、主动撤销；HTTP 接口在 api/routes/auth.ts |
 | transcripts | 正文领域类型、查询 schema、分页 SQL、文字镜像的去重策略与原子发布 |
 | transcription-jobs | 任务输入与来源映射、提交策略、持久任务/租约、worker、各供应商适配、小时累积策略 |
 | provider-settings | 配置输入 schema、凭据校验和脱敏、配置版本选择、独立 YAML repository |

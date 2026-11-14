@@ -2,7 +2,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { Repository } from "../src/infrastructure/database.js";
-import { createApp } from "../src/app.js";
+import { createApp } from "../src/api/app.js";
 
 test("mirror is authenticated, idempotent and never schedules ASR", async () => {
   const repo = new Repository(":memory:");

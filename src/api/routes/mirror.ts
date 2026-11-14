@@ -7,9 +7,9 @@ import {
   security,
   response,
   errors,
-} from "../../http/common.js";
-import { mirrorTranscripts } from "./mirror.js";
-import { MirrorBatch } from "./mirror-schema.js";
+} from "../common.js";
+import { mirrorTranscripts } from "../../modules/transcripts/mirror.js";
+import { MirrorBatch } from "../../modules/transcripts/mirror-schema.js";
 /** Register the module without opening listeners or performing provider requests. */
 export function register(
   app: OpenAPIHono<Env>,

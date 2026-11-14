@@ -20,7 +20,7 @@ import {
   DoubaoTranscription,
 } from "../src/modules/transcription-jobs/providers/registry.js";
 import { Repository } from "../src/infrastructure/database.js";
-import { createApp } from "../src/app.js";
+import { createApp } from "../src/api/app.js";
 import { tick } from "../src/modules/transcription-jobs/worker.js";
 const input = {
   sourceId: "a".repeat(64),

@@ -2,7 +2,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { Repository } from "../src/infrastructure/database.js";
-import { createApp } from "../src/app.js";
+import { createApp } from "../src/api/app.js";
 import { Filters, Stats, Page } from "../src/contracts.js";
 import {
   normalize,

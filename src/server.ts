@@ -3,7 +3,7 @@ import { serve } from "@hono/node-server";
 import { mkdirSync, chmodSync } from "node:fs";
 import { join } from "node:path";
 import { Repository } from "./infrastructure/database.js";
-import { createApp } from "./app.js";
+import { createApp } from "./api/app.js";
 import { DashScope } from "./modules/transcription-jobs/providers/qwen.js";
 import { TranscriptionConfigs } from "./modules/provider-settings/service.js";
 import {
