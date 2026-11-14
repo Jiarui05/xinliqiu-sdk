@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Publish only committed backend source to the auto-deploy branch, without exposing device research history."""
+"""Publish the committed server tree to the existing automatic deployment branch."""
 import subprocess
+import os
 
 
 def git(*args):
@@ -9,25 +10,25 @@ def git(*args):
 
 
 def main():
-    """Create a backend-only commit with the last deployed source as parent, then push normally."""
+    """Create a server-only commit with the last deployed source as parent, then push normally."""
     root = git("rev-parse", "--show-toplevel")
-    import os
     os.chdir(root)
-    if git("status", "--porcelain", "--", "backend"):
-        raise SystemExit("Commit backend changes before publishing")
+    remote_name = os.environ.get("XQ_DEPLOY_REMOTE", "cloud")
+    if git("status", "--porcelain", "--", "server"):
+        raise SystemExit("Commit server changes before publishing")
     branch = "deploy/transcript-service"
-    tree = git("rev-parse", "HEAD:backend")
-    remote = git("ls-remote", "--heads", "origin", "refs/heads/" + branch)
+    tree = git("rev-parse", "HEAD:server")
+    remote = git("ls-remote", "--heads", remote_name, "refs/heads/" + branch)
     parent = []
     if remote:
-        git("fetch", "origin", "refs/heads/" + branch)
+        git("fetch", remote_name, "refs/heads/" + branch)
         previous = git("rev-parse", "FETCH_HEAD")
         if git("rev-parse", previous + "^{tree}") == tree:
-            print("Cloud branch already matches the committed backend")
+            print("Cloud branch already matches the committed server")
             return
         parent = ["-p", previous]
-    commit = git("commit-tree", tree, *parent, "-m", "Deploy backend " + git("rev-parse", "--short", "HEAD"))
-    subprocess.run(["git", "push", "origin", commit + ":refs/heads/" + branch], check=True)
+    commit = git("commit-tree", tree, *parent, "-m", "Deploy server " + git("rev-parse", "--short", "HEAD"))
+    subprocess.run(["git", "push", remote_name, commit + ":refs/heads/" + branch], check=True)
     print("Published " + commit + "; verify the Dokploy deployment and HTTPS release manifest")
 
 

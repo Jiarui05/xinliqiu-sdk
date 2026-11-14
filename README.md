@@ -66,7 +66,7 @@ Hono + TypeScript、Scalar、OpenAPI → Orval 客户端、应用 Token、CLI �
 
 ## 持续部署
 
-`pnpm cloud:publish` 将已提交的 `backend/` 树发布到 `deploy/transcript-service`，不发布其他设备研究目录和开发分支历史。首次提交无父历史，后续提交基于上次部署分支，正常 push 不强制覆盖并发更新。Dokploy 的 GitHub provider 监听该分支 push，按根目录 `compose.cloud.yaml` 构建 API 镜像和同版本 CLI/skill 资产。数据库继续挂载已有独立持久卷。
+`pnpm cloud:publish` 将已提交的 `server/` 树发布到 `deploy/transcript-service`，客户端由本机独立构建。首次提交无父历史，后续提交基于上次部署分支，正常 push 不强制覆盖并发更新。Dokploy 的 GitHub provider 监听该分支 push，按根目录 `compose.cloud.yaml` 构建 API 镜像和同版本 CLI/skill 资产。数据库继续挂载已有独立持久卷。
 
 开发流程：修改 → `pnpm check` → commit → `pnpm cloud:publish`。以 Dokploy 完成状态及公网 `/cli/latest.json` 的发行标识确认上线；仅 push 成功不代表发布完成。新安装自动取得当前版本，已安装 CLI 显式执行 `xq self update`。
 
