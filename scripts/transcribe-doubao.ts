@@ -1,4 +1,12 @@
-/** Explicit one-recording Doubao evaluation. Uses an isolated durable queue and preserves existing sidecars by default. */
+/**
+ * @file transcribe-doubao.ts
+ * @description 用独立任务队列评估单份录音的豆包结果，默认保留已有转录。
+ *
+ * 职责与入口：
+ * - 模块初始化与配置 → 本文件的顶层声明或命令入口
+ *
+ * 边界：具体读写和执行时机以各入口为准；凭据与用户数据不得进入日志或发行包。
+ */
 import {
   readFileSync,
   writeFileSync,
@@ -12,11 +20,11 @@ import { join, basename, resolve, relative } from "node:path";
 import { createHash, randomUUID } from "node:crypto";
 import { parseArgs } from "node:util";
 import { Repository } from "../src/infrastructure/database.js";
-import { TranscriptionConfigs } from "../src/modules/provider-settings/service.js";
-import { configuredProvider } from "../src/modules/transcription-jobs/providers/registry.js";
-import { cosReferenceStorage } from "../src/modules/voice-identity/service.js";
+import { TranscriptionConfigs } from "../src/modules/provider-settings/provider-settings.service.js";
+import { configuredProvider } from "../src/modules/transcription-jobs/providers/registry.factory.js";
+import { cosReferenceStorage } from "../src/modules/voice-identity/voice-identity.service.js";
 import { tosReferenceStorage } from "../src/infrastructure/storage/tos.js";
-import { tick } from "../src/modules/transcription-jobs/worker.js";
+import { tick } from "../src/modules/transcription-jobs/transcription-jobs.worker.js";
 import type { TimedWord } from "../src/contracts.js";
 const { values } = parseArgs({
   options: {

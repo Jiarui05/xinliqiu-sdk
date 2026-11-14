@@ -1,5 +1,16 @@
 #!/usr/bin/env node
-/** Agent CLI: domain shortcuts, schema inspection, dry runs and bounded transcript output. */
+/**
+ * @file main.ts
+ * @description 提供面向 Agent 的 CLI 命令、契约查询、试运行和有界正文读取。
+ *
+ * 职责与入口：
+ * - CLI 命令解析与分发 → program.parseAsync()
+ * - 标准输出仅包含请求结果，不输出 Token 或签名音频地址 → output()
+ * - 发行包从相邻文件加载资源 → asset()
+ * - 日历筛选必须显式包含时区，避免不同机器把同一日期解释为不同时间 → time()
+ *
+ * 边界：具体读写和执行时机以各入口为准；凭据与用户数据不得进入日志或发行包。
+ */
 import { Command } from "commander";
 import {
   existsSync,
@@ -25,7 +36,7 @@ const program = new Command()
   .option("--dry-run", "预览请求，不执行")
   .option("--fields <names>", "输出指定顶层字段")
   .option("--json", "JSON 输出（默认）");
-/** Only result fields reach stdout; never print tokens or signed audio URLs. */
+/** 标准输出仅包含请求结果，不输出 Token 或签名音频地址。 */
 function output(value: unknown) {
   const fields = program.opts().fields as string | undefined;
   console.log(
@@ -42,7 +53,7 @@ function output(value: unknown) {
     ),
   );
 }
-/** Bundled releases keep assets adjacent; development sources use the backend package root. */
+/** 发行包从相邻文件加载资源；开发环境使用服务端工程目录。 */
 function asset(name: string) {
   const adjacent = new URL(`./${name}`, import.meta.url);
   return existsSync(adjacent)
@@ -52,7 +63,7 @@ function asset(name: string) {
         import.meta.url,
       );
 }
-/** Require explicit timezone offsets for human-supplied calendar filters. */
+/** 日历筛选必须显式包含时区，避免不同机器把同一日期解释为不同时间。 */
 function time(v: string | undefined) {
   if (v === undefined) return undefined;
   if (!/(Z|[+-]\d\d:\d\d)$/.test(v) || !Number.isFinite(Date.parse(v)))

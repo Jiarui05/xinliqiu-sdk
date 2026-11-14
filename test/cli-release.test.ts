@@ -1,4 +1,12 @@
-/** Verify a downloaded CLI works outside the checkout, preserves credentials and rejects corrupt updates. */
+/**
+ * @file cli-release.test.ts
+ * @description 验证云端下载的 CLI 可独立运行、保留登录，并拒绝损坏的更新。
+ *
+ * 职责与入口：
+ * - 行为回归验证 → 本文件的 test() 用例
+ *
+ * 边界：使用合成数据或本机临时目录验证行为，不调用真实付费模型。
+ */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { serve } from "@hono/node-server";

@@ -1,4 +1,12 @@
-/** Hono HTTP boundary: OpenAPI validation, token-derived ownership, explicit ASR submission and count-first reads. */
+/**
+ * @file app.ts
+ * @description 组装 Hono 路由、鉴权、输入校验、错误响应与 API 文档。
+ *
+ * 职责与入口：
+ * - 创建可测试的 HTTP 应用 → createApp()
+ *
+ * 边界：具体读写和执行时机以各入口为准；凭据与用户数据不得进入日志或发行包。
+ */
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { HTTPException } from "hono/http-exception";
 import { bodyLimit } from "hono/body-limit";
@@ -8,14 +16,14 @@ import { Repository } from "../infrastructure/database.js";
 import { cliRelease } from "./cli-release.js";
 import { type Env, type Options } from "./common.js";
 export type { Options } from "./common.js";
-import { register as registerVoices } from "./routes/voice-identity.js";
+import { register as registerVoices } from "./routes/voice-identity.route.js";
 import { DomainError } from "../shared/errors.js";
-import { register as registerServices } from "./routes/provider-settings.js";
-import { register as registerAuth } from "./routes/auth.js";
-import { register as registerTranscripts } from "./routes/transcripts.js";
-import { register as registerJobs } from "./routes/jobs.js";
-import { register as registerMirror } from "./routes/mirror.js";
-/** Build without starting listeners or contacting a provider; tests inject their own durable repository. */
+import { register as registerServices } from "./routes/provider-settings.route.js";
+import { register as registerAuth } from "./routes/auth.route.js";
+import { register as registerTranscripts } from "./routes/transcripts.route.js";
+import { register as registerJobs } from "./routes/jobs.route.js";
+import { register as registerMirror } from "./routes/mirror.route.js";
+/** 创建可测试的 HTTP 应用；不启动监听、不调用供应商，依赖由调用方注入。 */
 export function createApp(repo: Repository, options: Options) {
   const app = new OpenAPIHono<Env>({
     defaultHook: (result, c) => {

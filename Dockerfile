@@ -1,4 +1,7 @@
-# Compile the API and downloadable CLI from the same checked-in contract.
+# @file Dockerfile
+# 目的：从同一份已提交契约生成经过检查的 API 与 CLI 镜像。
+# 职责与入口：类型、契约、构建和测试 → build 阶段；应用运行 → 最终阶段。
+# 边界：用户数据通过独立卷挂载，构建过程不访问生产配置。
 FROM node:24-bookworm-slim AS build
 WORKDIR /app
 ENV NODE_OPTIONS=--max-old-space-size=256
@@ -13,7 +16,7 @@ COPY skill ./skill
 COPY openapi.json ./openapi.json
 RUN pnpm check && pnpm exec tsc --noEmit false --outDir dist && pnpm prune --prod
 
-# Personal audio and credentials are mounted at runtime, never baked into the image.
+# 用户音频和凭据只在运行时挂载，不写入镜像。
 FROM node:24-bookworm-slim
 WORKDIR /app
 COPY package.json ./

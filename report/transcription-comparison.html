@@ -1,4 +1,11 @@
 <!doctype html>
+<!--
+文件：transcription-comparison.html
+目的：展示已完成转录的同时间对照结果。
+职责与入口：安全文本渲染、共享时间行和版本切换由本页脚本处理。
+边界：只使用页面内嵌数据，不发起转录或加载远程资源。
+-->
+
 <html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
@@ -364,7 +371,7 @@
       __COMPARISON_DATA__
     </script>
     <script>
-      /** Render only escaped text from the private, normalized ASR artifact; never load remote resources. */
+      /** 只渲染经过转义的本机转录文本，不加载远程资源。 */
       const data = JSON.parse(document.getElementById("data").textContent),
         $ = (id) => document.getElementById(id),
         STEP = 15000;
@@ -401,7 +408,7 @@
         }
         return map;
       });
-      /** Both columns occupy the same CSS grid row, so text length cannot create independent scroll drift. */
+      /** 左右内容共用同一网格行，避免文字长度不同导致滚动时间偏离。 */
       function cell(words, version, t) {
         const el = document.createElement("div");
         el.className = "cell";
@@ -435,7 +442,7 @@
         }
         return el;
       }
-      /** Preserve the visible timestamp when switching experimental versions, rather than preserving scroll percentage. */
+      /** 切换对比版本时保留当前可见时间，而不是滚动百分比。 */
       function currentTime() {
         const top = $("scroll").getBoundingClientRect().top;
         const rows = [...$("scroll").querySelectorAll("[data-time]")];

@@ -1,12 +1,20 @@
-/** Private COS storage adapter and deployment credential loading. */
+/**
+ * @file cos.ts
+ * @description 封装私有 COS 对象存储和部署凭据加载。
+ *
+ * 职责与入口：
+ * - 对象存储凭据与转录凭据分开管理，桶内对象保持私有 → cosReferenceStorage()
+ *
+ * 边界：具体读写和执行时机以各入口为准；凭据与用户数据不得进入日志或发行包。
+ */
 import COS from "cos-nodejs-sdk-v5";
 import YAML from "yaml";
 import { homedir } from "node:os";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
-import type { ReferenceStorage } from "../../modules/voice-identity/domain.js";
-/** Deployment-only COS credentials are separate from transcription credentials; bucket objects stay private. */
+import type { ReferenceStorage } from "../../modules/voice-identity/voice-identity.types.js";
+/** 对象存储凭据与转录凭据分开管理，桶内对象保持私有。 */
 export function cosReferenceStorage(): ReferenceStorage | undefined {
   let local:
     | { bucket: string; region: string; secretId: string; secretKey: string }
@@ -39,6 +47,7 @@ export function cosReferenceStorage(): ReferenceStorage | undefined {
   if (!Bucket || !Region || !SecretId || !SecretKey) return undefined;
   const cos = new COS({ SecretId, SecretKey, Timeout: 30000 });
   return {
+    /** 保存对象或元数据；调用方必须已经完成输入校验。 */
     async put(Key, Body) {
       await cos.putObject({
         Bucket,
@@ -49,6 +58,7 @@ export function cosReferenceStorage(): ReferenceStorage | undefined {
         ContentType: "audio/wav",
       });
     },
+    /** 生成短期私有下载地址，调用方不得记录或公开该地址。 */
     url(Key) {
       return cos.getObjectUrl({
         Bucket,

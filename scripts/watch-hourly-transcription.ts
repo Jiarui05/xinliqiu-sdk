@@ -1,4 +1,15 @@
-/** Persistent local importer. Explicit YAML opt-in authorizes hourly uploads; unknown jobs never auto-resubmit. */
+/**
+ * @file watch-hourly-transcription.ts
+ * @description 持久运行本机小时调度器；只有 YAML 显式开启后才上传，未知任务不自动重提。
+ *
+ * 职责与入口：
+ * - 只有确认锁中的进程已退出，才能释放旧锁 → releaseStale()
+ * - 停止本机调度器 → stop()
+ * - 公开进度只包含统计信息，不包含文字、签名地址或凭据 → status()
+ * - 恢复一个已固定的任务清单，或为新满足条件的音频创建独立批次 → run()
+ *
+ * 边界：具体读写和执行时机以各入口为准；凭据与用户数据不得进入日志或发行包。
+ */
 import {
   readFileSync,
   writeFileSync,
@@ -17,17 +28,17 @@ import { spawn, type ChildProcess } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import YAML from "yaml";
 import { Repository } from "../src/infrastructure/database.js";
-import { TranscriptionConfigs } from "../src/modules/provider-settings/service.js";
+import { TranscriptionConfigs } from "../src/modules/provider-settings/provider-settings.service.js";
 import {
   HOURLY_AUDIO_MS,
   pendingAudioMs,
-} from "../src/modules/transcription-jobs/hourly-policy.js";
+} from "../src/modules/transcription-jobs/transcription-jobs.policy.js";
 const data = process.env.XQ_DATA_DIR;
 if (!data) throw Error("DATA_DIR_REQUIRED");
 process.umask(0o077);
 const root = join(data, "auto-transcription");
 mkdirSync(root, { recursive: true, mode: 0o700 });
-/** A dead PID can release an abandoned local lock; a live owner is never displaced. */
+/** 只有确认锁中的进程已退出，才能释放旧锁；不抢占活跃进程。 */
 function releaseStale(path: string) {
   if (!existsSync(path)) return;
   const text = readFileSync(path, "utf8"),
@@ -48,14 +59,14 @@ const repo = new Repository(join(data, "backend.sqlite")),
   configs = new TranscriptionConfigs(join(data, "transcription-configs"));
 let stopping = false,
   child: ChildProcess | undefined;
-/** Stop the local scheduler; durable provider jobs remain owned by the API worker. */
+/** 停止本机调度器；已持久化的供应商任务仍由 API worker 管理。 */
 function stop() {
   stopping = true;
   child?.kill("SIGTERM");
 }
 process.once("SIGTERM", stop);
 process.once("SIGINT", stop);
-/** Public progress contains no transcript, signed URL or credential material. */
+/** 公开进度只包含统计信息，不包含文字、签名地址或凭据。 */
 function status(value: object) {
   const path = join(root, "status.json"),
     temp = path + ".tmp";
@@ -66,7 +77,7 @@ function status(value: object) {
   );
   renameSync(temp, path);
 }
-/** Resume one exact frozen manifest, or freeze new eligible audio in a separate bounded runner. */
+/** 恢复一个已固定的任务清单，或为新满足条件的音频创建独立批次。 */
 async function run(folder: string, library: string) {
   releaseStale(join(folder, "runner.lock"));
   mkdirSync(folder, { recursive: true, mode: 0o700 });

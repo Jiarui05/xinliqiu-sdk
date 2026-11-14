@@ -1,13 +1,21 @@
-/** Enforce durable module boundaries and verify reopened tasks never resubmit known provider work. */
+/**
+ * @file architecture.test.ts
+ * @description 检查模块依赖边界，并验证任务重开后不会重复提交已知供应商任务。
+ *
+ * 职责与入口：
+ * - 只遍历项目源码，不访问用户数据或依赖目录 → files()
+ *
+ * 边界：使用合成数据或本机临时目录验证行为，不调用真实付费模型。
+ */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync, mkdtempSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { Repository } from "../src/infrastructure/database.js";
-import { tick } from "../src/modules/transcription-jobs/worker.js";
+import { tick } from "../src/modules/transcription-jobs/transcription-jobs.worker.js";
 import { createApp } from "../src/api/app.js";
-/** Walk owned source only, never user data or dependencies. */
+/** 只遍历项目源码，不访问用户数据或依赖目录。 */
 function files(root: string): string[] {
   return readdirSync(root, { withFileTypes: true }).flatMap((e) =>
     e.isDirectory() ? files(join(root, e.name)) : [join(root, e.name)],
@@ -23,7 +31,7 @@ test("repositories/domain/services do not depend on HTTP and routes contain no S
   }
   for (const path of files("src/modules").filter((p) => p.endsWith(".ts"))) {
     const code = readFileSync(path, "utf8");
-    if (/(?:repository|domain|service)\.ts$/.test(path))
+    if (/(?:repository|types|service)\.ts$/.test(path))
       assert.doesNotMatch(
         code,
         /(?:from|import)\s*["'](?:@hono|hono|.*\/(?:http|api)\/)/,
@@ -136,4 +144,29 @@ test("oversized requests remain a redacted transport rejection", async () => {
   assert.equal(r.status, 413);
   assert.equal((await r.json()).error.code, "PAYLOAD_TOO_LARGE");
   repo.db.close();
+});
+
+test("手写源码具有中文文件说明，业务文件采用职责后缀", () => {
+  for (const file of [
+    ...files("src"),
+    ...files("scripts"),
+    ...files("test"),
+    "orval.config.ts",
+  ].filter((p) => /\.(ts|mjs)$/.test(p))) {
+    const text = readFileSync(file, "utf8");
+    const header = text.match(/^(?:#![^\n]*\n)?\s*(\/\*\*[\s\S]*?\*\/)/)?.[1];
+    assert.ok(header, file + " 缺少文件头");
+    assert.ok(header.includes("@file " + file.split("/").at(-1)), file);
+    assert.match(header, /@description[^\n]*[\u4e00-\u9fff]/, file);
+    assert.match(header, /职责与入口：/, file);
+    assert.match(header, /边界：/, file);
+    if (file.startsWith("src/modules/") && !file.includes("/providers/"))
+      assert.match(
+        file,
+        /\.(service|repository|types|schema|policy|worker)\.ts$/,
+        file,
+      );
+    if (file.startsWith("src/api/routes/"))
+      assert.match(file, /\.route\.ts$/, file);
+  }
 });

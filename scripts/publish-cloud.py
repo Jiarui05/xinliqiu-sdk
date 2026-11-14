@@ -1,16 +1,25 @@
 #!/usr/bin/env python3
-"""Publish the committed server tree to the existing automatic deployment branch."""
+"""
+文件：publish-cloud.py
+目的：检查并发布已提交的 server 子树，不携带用户数据。
+
+职责与入口：
+- Git 命令与身份复用 → git()。
+- 发布检查、构造部署提交和正常推送 → main()。
+
+边界：检查失败或推送冲突时停止，不强制覆盖远程分支。
+"""
 import subprocess
 import os
 
 
 def git(*args):
-    """Run Git with the operator's configured authentication and fail on concurrent push conflicts."""
+    """使用已配置的身份执行 Git；并发推送冲突时停止，不强制覆盖。"""
     return subprocess.check_output(["git", *args], text=True).strip()
 
 
 def main():
-    """Create a server-only commit with the last deployed source as parent, then push normally."""
+    """检查源码与契约，再以上次部署为父提交发布 server 子树。"""
     root = git("rev-parse", "--show-toplevel")
     os.chdir(root)
     remote_name = os.environ.get("XQ_DEPLOY_REMOTE", "cloud")

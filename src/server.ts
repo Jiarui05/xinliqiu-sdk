@@ -1,19 +1,29 @@
-/** Configurable API listener and durable worker supervisor; local use defaults to loopback. */
+/**
+ * @file server.ts
+ * @description 启动本机 API 与持久任务处理器；默认只监听回环地址。
+ *
+ * 职责与入口：
+ * - 创建 HTTP 监听 → serve()
+ * - 调度持久任务轮询 → tick()
+ * - 退出前等待当前任务释放数据库 → shutdown()
+ *
+ * 边界：具体读写和执行时机以各入口为准；凭据与用户数据不得进入日志或发行包。
+ */
 import { serve } from "@hono/node-server";
 import { mkdirSync, chmodSync } from "node:fs";
 import { join } from "node:path";
 import { Repository } from "./infrastructure/database.js";
 import { createApp } from "./api/app.js";
-import { DashScope } from "./modules/transcription-jobs/providers/qwen.js";
-import { TranscriptionConfigs } from "./modules/provider-settings/service.js";
+import { DashScope } from "./modules/transcription-jobs/providers/qwen.provider.js";
+import { TranscriptionConfigs } from "./modules/provider-settings/provider-settings.service.js";
 import {
   VoiceReferences,
   cosReferenceStorage,
-} from "./modules/voice-identity/service.js";
-import { configuredProvider } from "./modules/transcription-jobs/providers/registry.js";
+} from "./modules/voice-identity/voice-identity.service.js";
+import { configuredProvider } from "./modules/transcription-jobs/providers/registry.factory.js";
 import { tosReferenceStorage } from "./infrastructure/storage/tos.js";
-import { batchingStatus } from "./modules/transcription-jobs/hourly-policy.js";
-import { tick } from "./modules/transcription-jobs/worker.js";
+import { batchingStatus } from "./modules/transcription-jobs/transcription-jobs.policy.js";
+import { tick } from "./modules/transcription-jobs/transcription-jobs.worker.js";
 const folder = process.env.XQ_DATA_DIR ?? ".data";
 mkdirSync(folder, { recursive: true, mode: 0o700 });
 chmodSync(folder, 0o700);
@@ -27,7 +37,7 @@ const services = new TranscriptionConfigs(
 const configured = Boolean(
   process.env.DASHSCOPE_API_KEY && process.env.DASHSCOPE_BASE_URL,
 );
-// Existing private environment credentials seed the local settings once.
+// 仅在没有已保存配置时，用现有环境凭据初始化一次本机配置。
 if (!services.active("local")) {
   if (process.env.TENCENT_SECRET_ID && process.env.TENCENT_SECRET_KEY) {
     services.save("local", {
@@ -98,7 +108,7 @@ const running = (async () => {
     await new Promise((r) => setTimeout(r, 1000));
   }
 })();
-/** Drain the current request before releasing SQLite; uncertain remote submissions remain recoverable. */
+/** 退出前等待当前任务释放数据库；提交结果未知的任务保留恢复状态。 */
 async function shutdown() {
   stopping = true;
   server.close();

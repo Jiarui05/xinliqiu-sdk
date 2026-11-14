@@ -1,4 +1,7 @@
-# Build the API and CLI assets together from the deployment branch; data survives replacement.
+# @file compose.cloud.yaml
+# 目的：声明云端 API 的构建、资源限制和持久卷。
+# 职责与入口：服务生命周期 → api；数据保留 → transcripts 卷。
+# 边界：更新应用不重建已有数据卷，不挂载本机录音。
 services:
   api:
     build:

@@ -1,4 +1,12 @@
-/** Upload completed transcript revisions to a private cloud API; never reads or uploads audio. */
+/**
+ * @file mirror-transcripts.ts
+ * @description 把已完成转录增量同步到私有云 API，不读取或上传音频。
+ *
+ * 职责与入口：
+ * - 每批得到云端确认后才推进本机记录 → sync()
+ *
+ * 边界：具体读写和执行时机以各入口为准；凭据与用户数据不得进入日志或发行包。
+ */
 import {
   readFileSync,
   writeFileSync,
@@ -10,7 +18,7 @@ import { join, dirname } from "node:path";
 import { parseArgs } from "node:util";
 import { createHash } from "node:crypto";
 import YAML from "yaml";
-import { MirrorBatch } from "../src/modules/transcripts/mirror-schema.js";
+import { MirrorBatch } from "../src/modules/transcripts/transcripts.schema.js";
 import { mirrorTranscripts } from "../src/generated/client.js";
 import { Client } from "../src/cli/client.js";
 const { values } = parseArgs({
@@ -28,7 +36,7 @@ process.once("SIGTERM", () => {
 process.once("SIGINT", () => {
   stopping = true;
 });
-/** Each acknowledged batch advances a local ledger; retries after interruption are idempotent on the server. */
+/** 每批得到云端确认后才推进本机记录；中断重试由服务端保证幂等。 */
 async function sync() {
   const config = YAML.parse(readFileSync(values.config!, "utf8"));
   process.env.XQ_API_URL = config.url;
@@ -49,7 +57,7 @@ async function sync() {
   let revisions: Record<string, string> = {},
     uploaded = 0,
     bytes = 0;
-  /** Persist success only after the cloud transaction is acknowledged, without logging transcript bodies. */
+  /** 只有云端事务成功返回后才记录同步成功，日志不包含正文。 */
   async function flush() {
     if (!pending.length) return;
     const payload = MirrorBatch.parse({ transcripts: pending });

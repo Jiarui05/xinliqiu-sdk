@@ -1,4 +1,12 @@
-/** One-time local-file transfer to the existing DashScope account's private, model-bound temporary storage. */
+/**
+ * @file temporary-upload.ts
+ * @description 将明确选定的本机音频上传到百炼账号内、绑定模型的临时私有存储。
+ *
+ * 职责与入口：
+ * - 临时上传凭据只保留在内存中 → temporaryUpload()
+ *
+ * 边界：具体读写和执行时机以各入口为准；凭据与用户数据不得进入日志或发行包。
+ */
 import { readFile, stat } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
@@ -12,7 +20,7 @@ const Policy = z.object({
   x_oss_object_acl: z.literal("private"),
   x_oss_forbid_overwrite: z.literal("true"),
 });
-/** Upload credentials remain in memory; filenames disclose neither device identity nor source paths. */
+/** 临时上传凭据只保留在内存中；对象名称不包含设备身份或本机来源路径。 */
 export async function temporaryUpload(
   base: string,
   key: string,

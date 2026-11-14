@@ -4,7 +4,9 @@
 
 `api/routes/` → `modules/` 中的业务 service → repository / provider port。
 
-`api/` 统一放置 Hono 应用入口、路由注册、公共响应和 HTTP 类型、发行文件入口；`modules/` 只组织业务校验、领域类型、业务流程、持久化与供应商适配。没有平行的 `http/` 或空的 `services/` 入口。
+`api/` 统一放置 Hono 应用入口、路由注册、公共响应和 HTTP 类型、发行文件入口；命名、中文文件说明和拆分取舍见 [CONVENTIONS.md](CONVENTIONS.md)。
+
+`modules/` 只组织业务校验、领域类型、业务流程、持久化与供应商适配。没有平行的 `http/` 或空的 `services/` 入口。
 
 业务层不依赖 Hono Context 或 HTTP 状态码；数据库层使用领域类型，不导入 HTTP schema。HTTP 层负责认证身份、Zod 校验、响应类型和状态码映射。
 

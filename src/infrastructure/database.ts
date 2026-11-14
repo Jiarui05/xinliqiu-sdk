@@ -1,11 +1,19 @@
-/** SQLite composition and transaction boundary; existing tables and durable task envelopes remain unchanged. */
+/**
+ * @file database.ts
+ * @description 组装 SQLite 连接与事务边界，保留既有表结构和任务记录格式。
+ *
+ * 职责与入口：
+ * - 原子提交或回滚同步业务操作，调用方无需拼接事务 SQL → Repository.transaction()
+ *
+ * 边界：具体读写和执行时机以各入口为准；凭据与用户数据不得进入日志或发行包。
+ */
 import { DatabaseSync } from "node:sqlite";
-import { AuthRepository } from "../modules/auth/repository.js";
-import { JobRepository } from "../modules/transcription-jobs/repository.js";
-import { MirrorRepository } from "../modules/transcripts/mirror-repository.js";
-import { TranscriptRepository } from "../modules/transcripts/repository.js";
-export type { StoredJob } from "../modules/transcription-jobs/repository.js";
-/** Own a single database connection and inject it into business-specific repositories. */
+import { AuthRepository } from "../modules/auth/auth.repository.js";
+import { JobRepository } from "../modules/transcription-jobs/transcription-jobs.repository.js";
+import { MirrorRepository } from "../modules/transcripts/transcripts.repository.js";
+import { TranscriptRepository } from "../modules/transcripts/transcripts.repository.js";
+export type { StoredJob } from "../modules/transcription-jobs/transcription-jobs.repository.js";
+/** 持有一个数据库连接，并注入各业务模块的 repository。 */
 export class Repository {
   readonly db: DatabaseSync;
   readonly auth: AuthRepository;
@@ -25,7 +33,7 @@ export class Repository {
     this.jobs = new JobRepository(this.db);
     this.transcripts = new TranscriptRepository(this.db);
   }
-  /** Commit or roll back one synchronous business operation without exposing SQL transaction commands. */
+  /** 原子提交或回滚同步业务操作，调用方无需拼接事务 SQL。 */
   transaction<T>(work: () => T): T {
     this.db.exec("BEGIN IMMEDIATE");
     try {

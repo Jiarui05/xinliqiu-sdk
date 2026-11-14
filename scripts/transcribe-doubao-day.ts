@@ -1,4 +1,15 @@
-/** Explicit day backfill using pinned Doubao identity, verified audio and private URLs. Never modifies source audio. */
+/**
+ * @file transcribe-doubao-day.ts
+ * @description 按明确日期回填豆包转录，固定声纹与配置并校验音频，不修改源录音。
+ *
+ * 职责与入口：
+ * - 固定来源映射，以便重启后保留文件间隔和校验预期 → Source
+ * - 描述固定来源集合及拼接时长 → Batch
+ * - 保存批次清单和固定配置，供中断后恢复 → Manifest
+ * - 原子更新进度和完成的转录文件，不在日志中输出正文 → atomic()
+ *
+ * 边界：具体读写和执行时机以各入口为准；凭据与用户数据不得进入日志或发行包。
+ */
 import {
   readFileSync,
   writeFileSync,
@@ -15,11 +26,11 @@ import { createHash, randomUUID } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { parseArgs } from "node:util";
 import { Repository, type StoredJob } from "../src/infrastructure/database.js";
-import { TranscriptionConfigs } from "../src/modules/provider-settings/service.js";
-import { cosReferenceStorage } from "../src/modules/voice-identity/service.js";
+import { TranscriptionConfigs } from "../src/modules/provider-settings/provider-settings.service.js";
+import { cosReferenceStorage } from "../src/modules/voice-identity/voice-identity.service.js";
 import { tosReferenceStorage } from "../src/infrastructure/storage/tos.js";
-import type { SourceSegment } from "../src/modules/transcription-jobs/domain.js";
-import { groupAudio } from "../src/modules/transcription-jobs/hourly-policy.js";
+import type { SourceSegment } from "../src/modules/transcription-jobs/transcription-jobs.types.js";
+import { groupAudio } from "../src/modules/transcription-jobs/transcription-jobs.policy.js";
 import type { TimedWord } from "../src/contracts.js";
 const { values } = parseArgs({
   options: {
@@ -58,7 +69,7 @@ const fd = openSync(lock, "wx", 0o600);
 writeFileSync(fd, String(process.pid));
 closeSync(fd);
 const repo = new Repository(join(process.env.XQ_DATA_DIR, "backend.sqlite"));
-/** A frozen source map preserves physical gaps and checksum expectations across restarts. */
+/** 固定来源映射，以便重启后保留文件间隔和校验预期。 */
 type Source = SourceSegment & {
   filename: string;
   sha256: string;
@@ -72,7 +83,7 @@ type Manifest = {
   batchMinutes?: number;
   batches: Batch[];
 };
-/** Atomically publish progress and completed sidecars without exposing transcript contents in logs. */
+/** 原子更新进度和完成的转录文件，不在日志中输出正文。 */
 function atomic(path: string, data: unknown) {
   const tmp = path + "." + randomUUID() + ".tmp";
   writeFileSync(tmp, JSON.stringify(data), { mode: 0o600, flag: "wx" });
@@ -191,7 +202,7 @@ try {
     throw Error("PINNED_CONFIG_INVALID");
   mkdirSync(join(folder, "backups"), { recursive: true, mode: 0o700 });
   mkdirSync(join(root, "transcripts"), { recursive: true, mode: 0o700 });
-  /** Verify every immutable source, then create a bounded lossless WAV with the same concatenation map. */
+  /** 验证每份不可变来源后再生成有界无损 WAV，并核对拼接时长。 */
   function prepare(batch: Batch) {
     const files = batch.sources.map((s) => {
       const path = join(root, "audio", s.filename),
@@ -252,7 +263,7 @@ try {
       throw Error("BATCH_DURATION_MISMATCH");
     return readFileSync(out);
   }
-  /** Export only completed jobs; backup previous results before the first replacement. */
+  /** 只导出已完成任务；首次替换前备份已有转录结果。 */
   function publish(batch: Batch) {
     let chars = 0,
       selfWords = 0;

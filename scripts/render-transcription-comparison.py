@@ -1,4 +1,14 @@
-"""Build a private self-contained comparison from completed experiments and their original clock maps."""
+"""
+文件：render-transcription-comparison.py
+目的：从已完成的结果生成按真实时间对齐的本机对比页面。
+
+职责与入口：
+- 输入解析 → parser.parse_args()。
+- 结果与来源时间映射 → main / experiment 数据库只读查询。
+- 页面生成 → 本文件的统计与模板写入流程。
+
+边界：不提交新的转录任务，不将正文发送到第三方。
+"""
 import argparse,bisect,json,sqlite3
 from pathlib import Path
 parser=argparse.ArgumentParser();parser.add_argument('--experiment',required=True);parser.add_argument('--database',required=True);parser.add_argument('--output',required=True);args=parser.parse_args()

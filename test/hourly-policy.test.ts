@@ -1,11 +1,19 @@
-/** Hourly accumulation must not duplicate scheduled input or miss late-arriving, verified audio. */
+/**
+ * @file hourly-policy.test.ts
+ * @description 验证小时累积不会重复调度，也不会遗漏迟到的已确认录音。
+ *
+ * 职责与入口：
+ * - 行为回归验证 → 本文件的 test() 用例
+ *
+ * 边界：使用合成数据或本机临时目录验证行为，不调用真实付费模型。
+ */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   HOURLY_AUDIO_MS,
   pendingAudioMs,
   groupAudio,
-} from "../src/modules/transcription-jobs/hourly-policy.js";
+} from "../src/modules/transcription-jobs/transcription-jobs.policy.js";
 test("only verified unscheduled recording time contributes to the one-hour threshold", () => {
   const records = [
     { id: "a", startMS: 200, name: "normal" },

@@ -1,4 +1,12 @@
-/** Synthetic references verify format, owner isolation and role mode without recording or uploading human speech. */
+/**
+ * @file voice-reference.test.ts
+ * @description 用合成音频验证格式、用户隔离和身份模式，不录制或上传真人声音。
+ *
+ * 职责与入口：
+ * - 构造 PCM 静音仅用于格式验证，不用于声纹匹配 → wav()
+ *
+ * 边界：使用合成数据或本机临时目录验证行为，不调用真实付费模型。
+ */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, rmSync } from "node:fs";
@@ -7,13 +15,13 @@ import { join } from "node:path";
 import {
   VoiceReferences,
   validateReference,
-} from "../src/modules/voice-identity/service.js";
-import { TranscriptionConfigs } from "../src/modules/provider-settings/service.js";
+} from "../src/modules/voice-identity/voice-identity.service.js";
+import { TranscriptionConfigs } from "../src/modules/provider-settings/provider-settings.service.js";
 import {
   TencentTranscription,
   tencentWords,
-} from "../src/modules/transcription-jobs/providers/registry.js";
-/** Construct PCM silence solely to test structural validation, never speaker matching. */
+} from "../src/modules/transcription-jobs/providers/registry.factory.js";
+/** 构造 PCM 静音仅用于格式验证，不用于声纹匹配。 */
 function wav(seconds = 10) {
   const b = Buffer.alloc(44 + seconds * 32000);
   b.write("RIFF");
@@ -146,7 +154,7 @@ test("Tencent role mode sends a fresh reference URL and preserves the named spea
   );
 });
 
-/** Failed remote enrollment cannot accidentally activate a half-configured identity mode. */
+/** 远程注册失败时，不得启用尚未完整配置的身份模式。 */
 test("Doubao voice save activates only after verified enrollment and preserves previous config on failure", async () => {
   const root = mkdtempSync(join(tmpdir(), "xq-voice-save-"));
   const original = globalThis.fetch;

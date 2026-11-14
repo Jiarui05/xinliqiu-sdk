@@ -1,8 +1,17 @@
-/** Shared HTTP types and response contracts; no business operations. */
+/**
+ * @file common.ts
+ * @description 定义 HTTP 上下文和公共响应契约，不执行业务操作。
+ *
+ * 职责与入口：
+ * - 音频地址白名单来自部署配置，不接受请求方自行扩大访问范围 → Options
+ * - 定义鉴权身份与请求追踪字段，由 HTTP 中间件注入 → Env
+ *
+ * 边界：具体读写和执行时机以各入口为准；凭据与用户数据不得进入日志或发行包。
+ */
 import { z } from "@hono/zod-openapi";
-import { TranscriptionConfigs } from "../modules/provider-settings/service.js";
+import { TranscriptionConfigs } from "../modules/provider-settings/provider-settings.service.js";
 import { ErrorBody } from "../contracts.js";
-/** Deployment allowlists are operator configuration, never request-controlled URLs. */
+/** 音频地址白名单来自部署配置，不接受请求方自行扩大访问范围。 */
 export type Options = {
   providerConfigured: boolean;
   audioHosts: string[];
@@ -14,11 +23,12 @@ export type Options = {
     state: string;
   };
 };
+/** 定义鉴权身份与请求追踪字段，由 HTTP 中间件注入。 */
 export type Env = {
   Variables: { owner: string; token: string; requestId: string };
 };
 export const security = [{ Bearer: [] }];
-/** Every documented success/error shape originates in the same Zod contract used at runtime. */
+/** 成功和错误响应统一使用运行时 Zod 契约生成文档。 */
 export const response = (schema: z.ZodType, description = "Success") => ({
   content: { "application/json": { schema } },
   description,

@@ -1,16 +1,24 @@
-/** Synthetic provider replies verify enrollment durability, identity preservation and ASR endpoint routing. */
+/**
+ * @file doubao-voiceprint.test.ts
+ * @description 使用合成供应商响应验证注册状态、身份保留和 ASR 端点选择。
+ *
+ * 职责与入口：
+ * - 行为回归验证 → 本文件的 test() 用例
+ *
+ * 边界：使用合成数据或本机临时目录验证行为，不调用真实付费模型。
+ */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
-import { mappedWords } from "../src/modules/transcription-jobs/domain.js";
-import { DoubaoVoiceprints } from "../src/modules/voice-identity/enrollment.js";
+import { mappedWords } from "../src/modules/transcription-jobs/transcription-jobs.types.js";
+import { DoubaoVoiceprints } from "../src/modules/voice-identity/voice-identity.enrollment.service.js";
 import {
   DoubaoTranscription,
   doubaoWords,
-} from "../src/modules/transcription-jobs/providers/registry.js";
+} from "../src/modules/transcription-jobs/providers/registry.factory.js";
 const voiceId = "1b4ff14e-76f0-4bba-9ddc-513078d6539b";
 test("identity mode uses standard ASR with private uploaded audio and a fixed voiceprint", async () => {
   const root = mkdtempSync(join(tmpdir(), "xq-identity-asr-"));

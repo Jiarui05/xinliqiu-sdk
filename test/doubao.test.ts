@@ -1,4 +1,12 @@
-/** Doubao API-key and local-audio paths are tested without cloud billing or private speech. */
+/**
+ * @file doubao.test.ts
+ * @description 离线验证豆包 API Key 与本机音频路径，不产生云端费用或使用私人声音。
+ *
+ * 职责与入口：
+ * - 行为回归验证 → 本文件的 test() 用例
+ *
+ * 边界：使用合成数据或本机临时目录验证行为，不调用真实付费模型。
+ */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
@@ -8,10 +16,10 @@ import { createHash } from "node:crypto";
 import {
   DoubaoTranscription,
   doubaoWords,
-} from "../src/modules/transcription-jobs/providers/registry.js";
-import { TranscriptionConfigs } from "../src/modules/provider-settings/service.js";
+} from "../src/modules/transcription-jobs/providers/registry.factory.js";
+import { TranscriptionConfigs } from "../src/modules/provider-settings/provider-settings.service.js";
 import { Repository } from "../src/infrastructure/database.js";
-import { tick } from "../src/modules/transcription-jobs/worker.js";
+import { tick } from "../src/modules/transcription-jobs/transcription-jobs.worker.js";
 const config = {
   id: "test",
   provider: "doubao" as const,

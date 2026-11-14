@@ -1,5 +1,14 @@
 #!/usr/bin/env node
-/** Install verified CLI artifacts atomically; preserve user credentials and existing working releases. */
+/**
+ * @file install-cli.mjs
+ * @description 校验 CLI 发行文件并原子安装，保留用户凭据和已有可用版本。
+ *
+ * 职责与入口：
+ * - 下载公开发行资源，不携带应用 Token，不跟随重定向 → download()
+ * - 目标位置已有其他程序时拒绝覆盖，避免替换不属于本项目的命令 → checkExecutable()
+ *
+ * 边界：具体读写和执行时机以各入口为准；凭据与用户数据不得进入日志或发行包。
+ */
 import { parseArgs } from "node:util";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
@@ -45,7 +54,7 @@ const prefix = resolve(values.prefix),
   root = join(prefix, "share/xinliqiu-cli"),
   releases = join(root, "releases"),
   executable = join(prefix, "bin/xq");
-/** Download public release files without an application token or redirects. */
+/** 下载公开发行资源，不携带应用 Token，不跟随重定向。 */
 async function download(name) {
   const r = await fetch(new URL("/cli/" + name, base), {
     redirect: "error",
@@ -58,7 +67,7 @@ async function download(name) {
   if (bytes.length > 10000000) throw Error("RELEASE_TOO_LARGE");
   return bytes;
 }
-/** Treat an existing unrelated executable as a conflict rather than overwriting another tool. */
+/** 目标位置已有其他程序时拒绝覆盖，避免替换不属于本项目的命令。 */
 async function checkExecutable() {
   try {
     const stat = await lstat(executable);

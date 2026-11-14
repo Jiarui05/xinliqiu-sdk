@@ -1,4 +1,12 @@
-/** Exercise generated HTTP client, actual CLI subprocess, private sidecar export together. */
+/**
+ * @file integration.test.ts
+ * @description 联合验证生成 HTTP 客户端、实际 CLI 子进程和私有转录文件导出。
+ *
+ * 职责与入口：
+ * - 行为回归验证 → 本文件的 test() 用例
+ *
+ * 边界：使用合成数据或本机临时目录验证行为，不调用真实付费模型。
+ */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { serve } from "@hono/node-server";

@@ -1,4 +1,12 @@
-/** Freeze an explicitly selected local library into bounded, lossless transcription batches. No network calls. */
+/**
+ * @file plan-library.ts
+ * @description 将明确选定的录音库固定为有界无损转录批次，不执行网络请求。
+ *
+ * 职责与入口：
+ * - 输入映射只记录来源校验值，不包含音频正文或设备凭据 → Source
+ *
+ * 边界：具体读写和执行时机以各入口为准；凭据与用户数据不得进入日志或发行包。
+ */
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { resolve, dirname, join, basename } from "node:path";
 import { createHash } from "node:crypto";
@@ -26,7 +34,7 @@ if (
   throw new Error("Invalid batch size or existing manifest");
 const index = JSON.parse(readFileSync(join(root, "state.json"), "utf8")),
   playback = JSON.parse(readFileSync(join(root, "playback.json"), "utf8"));
-/** The input map stores source checksums, never audio bodies or device credentials. */
+/** 输入映射只记录来源校验值，不包含音频正文或设备凭据。 */
 type Source = {
   sourceId: string;
   recordedAt: number;

@@ -1,10 +1,18 @@
-/** Synthetic enrollment replies verify durable identity registration and unknown-result recovery. */
+/**
+ * @file voiceprint-registration.test.ts
+ * @description 用合成注册响应验证持久化与结果未知时的恢复策略。
+ *
+ * 职责与入口：
+ * - 行为回归验证 → 本文件的 test() 用例
+ *
+ * 边界：使用合成数据或本机临时目录验证行为，不调用真实付费模型。
+ */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { DoubaoVoiceprints } from "../src/modules/voice-identity/enrollment.js";
+import { DoubaoVoiceprints } from "../src/modules/voice-identity/voice-identity.enrollment.service.js";
 const voiceId = "1b4ff14e-76f0-4bba-9ddc-513078d6539b";
 test("enrollment persists before submit and verifies the returned voice before reuse", async () => {
   const root = mkdtempSync(join(tmpdir(), "xq-enrollment-"));

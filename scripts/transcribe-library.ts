@@ -1,4 +1,19 @@
-/** Explicit snapshot backfill. Verifies immutable WAVs, uploads only audio, and exports completed words atomically. */
+/**
+ * @file transcribe-library.ts
+ * @description 按明确快照回填转录：验证 WAV、上传音频、原子导出完成词项。
+ *
+ * 职责与入口：
+ * - 本机清单路径不进入 HTTP API 或供应商对象名称 → Source
+ * - 描述固定来源集合及拼接时长 → Batch
+ * - 保存批次清单和固定配置，供中断后恢复 → Manifest
+ * - 通过原子重命名发布私有元数据和转录文件 → atomic()
+ * - 导出已完成批次，不把正文写入终端或 Agent 上下文 → exportBatch()
+ * - 无损拼接前验证来源字节，编码后再次核对时长 → prepare()
+ * - 计费前的临时上传可重试 → enqueue()
+ * - 限制同时执行的批次数 → run()
+ *
+ * 边界：具体读写和执行时机以各入口为准；凭据与用户数据不得进入日志或发行包。
+ */
 import {
   readFileSync,
   writeFileSync,
@@ -20,9 +35,9 @@ import {
   validateSources,
   type JobInput,
   type SourceSegment,
-} from "../src/modules/transcription-jobs/domain.js";
+} from "../src/modules/transcription-jobs/transcription-jobs.types.js";
 import type { TimedWord } from "../src/contracts.js";
-/** Local manifest paths never enter the HTTP API or the provider's object names. */
+/** 本机清单路径不进入 HTTP API 或供应商对象名称。 */
 type Source = SourceSegment & {
   filename: string;
   sha256: string;
@@ -87,14 +102,14 @@ try {
     "A runner lock already exists; inspect its owner before resuming",
   );
 }
-/** Publish small private metadata/sidecars with an atomic rename. */
+/** 通过原子重命名发布私有元数据和转录文件。 */
 function atomic(path: string, value: unknown) {
   mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
   const temp = path + "." + randomUUID() + ".tmp";
   writeFileSync(temp, JSON.stringify(value), { mode: 0o600 });
   renameSync(temp, path);
 }
-/** Export a finished batch without dumping transcript bodies to stdout or the agent context. */
+/** 导出已完成批次，不把正文写入终端或 Agent 上下文。 */
 function exportBatch(batch: Batch) {
   for (const source of batch.sources) {
     const rows = repo.db
@@ -123,7 +138,7 @@ function exportBatch(batch: Batch) {
     sources: batch.sources.length,
   });
 }
-/** Validate source bytes before lossless concatenation; duration is checked again after encoding. */
+/** 无损拼接前验证来源字节，编码后再次核对时长。 */
 function prepare(batch: Batch) {
   validateSources(batch.sources);
   const output = join(folder, batch.id + ".flac");
@@ -191,7 +206,7 @@ function prepare(batch: Batch) {
   renameSync(temporary, output);
   return output;
 }
-/** Temporary uploads can be retried before billing; model submissions are owned by the durable worker. */
+/** 计费前的临时上传可重试；模型任务提交由持久 worker 管理。 */
 async function enqueue(batch: Batch) {
   const file = prepare(batch),
     cache = join(folder, batch.id + ".uploads.json");
@@ -231,7 +246,7 @@ async function enqueue(batch: Batch) {
   };
   repo.jobs.enqueue(manifest.owner, input);
 }
-/** Keep one bounded group in flight; stop creating work if any uncertain or failed submission appears. */
+/** 限制同时执行的批次数；遇到失败或提交结果未知时停止新增任务。 */
 async function run() {
   const batches = manifest.batches.slice(0, limit);
   let last = "";

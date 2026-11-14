@@ -1,4 +1,13 @@
-/** Acceptance tests for ownership, output budgets, provider contracts and crash-safe asynchronous work. */
+/**
+ * @file backend.test.ts
+ * @description 验证身份隔离、输出预算、供应商契约和异步任务中断恢复。
+ *
+ * 职责与入口：
+ * - 创建隔离的内存数据库和测试身份 → setup()
+ * - 写入合成任务及转录，供请求行为验证 → seed()
+ *
+ * 边界：使用合成数据或本机临时目录验证行为，不调用真实付费模型。
+ */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { Repository } from "../src/infrastructure/database.js";
@@ -8,13 +17,13 @@ import {
   normalize,
   combine,
   type Provider,
-} from "../src/modules/transcription-jobs/providers/qwen.js";
-import { tick } from "../src/modules/transcription-jobs/worker.js";
+} from "../src/modules/transcription-jobs/providers/qwen.provider.js";
+import { tick } from "../src/modules/transcription-jobs/transcription-jobs.worker.js";
 const token = "synthetic-application-token-owner-a-12345",
   other = "synthetic-application-token-owner-b-67890";
 const source = "a".repeat(64),
   audioUrl = "https://audio.example.test/test.wav";
-/** Synthetic provider payloads carry real contract fields, not private recordings. */
+/** 供应商测试数据只包含合成契约字段，不使用私人录音。 */
 const raw = (text = "你好", speaker?: number) => ({
   transcripts: [
     {

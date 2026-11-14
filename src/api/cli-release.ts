@@ -1,4 +1,12 @@
-/** Serve only public, build-generated CLI assets; never expose the application data directory. */
+/**
+ * @file cli-release.ts
+ * @description 仅提供构建生成的公开 CLI 资源，不暴露应用数据目录。
+ *
+ * 职责与入口：
+ * - 只接受白名单文件名，防止访问凭据和 SQLite 数据文件 → cliRelease()
+ *
+ * 边界：具体读写和执行时机以各入口为准；凭据与用户数据不得进入日志或发行包。
+ */
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 const types: Record<string, string> = {
@@ -9,7 +17,7 @@ const types: Record<string, string> = {
   "install.mjs": "text/javascript",
   "install.sh": "text/plain; charset=utf-8",
 };
-/** Exact filenames prevent requests from traversing into credentials or the SQLite volume. */
+/** 只接受白名单文件名，防止访问凭据和 SQLite 数据文件。 */
 export function cliRelease(filename: string) {
   const root = process.env.XQ_CLI_RELEASE_DIR;
   if (!root || !Object.hasOwn(types, filename))

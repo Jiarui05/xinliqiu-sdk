@@ -1,4 +1,12 @@
-/** Build a portable CLI release from public source assets only; no personal configuration is packaged. */
+/**
+ * @file build-cli.ts
+ * @description 仅使用公开源码资源构建独立 CLI 发行包，不打包用户配置。
+ *
+ * 职责与入口：
+ * - 模块初始化与配置 → 本文件的顶层声明或命令入口
+ *
+ * 边界：具体读写和执行时机以各入口为准；凭据与用户数据不得进入日志或发行包。
+ */
 import { build } from "esbuild";
 import { mkdirSync, readFileSync, writeFileSync, copyFileSync } from "node:fs";
 import { createHash } from "node:crypto";

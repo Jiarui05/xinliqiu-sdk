@@ -1,4 +1,12 @@
-/** Local batch imports preserve wall-clock gaps and enforce model-scoped private uploads. */
+/**
+ * @file local-import.test.ts
+ * @description 验证本机批量导入保留真实时间空白，并使用绑定模型的私有上传。
+ *
+ * 职责与入口：
+ * - 行为回归验证 → 本文件的 test() 用例
+ *
+ * 边界：使用合成数据或本机临时目录验证行为，不调用真实付费模型。
+ */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
@@ -8,9 +16,9 @@ import {
   mappedWords,
   validateSources,
   type JobInput,
-} from "../src/modules/transcription-jobs/domain.js";
+} from "../src/modules/transcription-jobs/transcription-jobs.types.js";
 import { temporaryUpload } from "../src/infrastructure/storage/temporary-upload.js";
-import { DashScope } from "../src/modules/transcription-jobs/providers/qwen.js";
+import { DashScope } from "../src/modules/transcription-jobs/providers/qwen.provider.js";
 const sources = [
   { sourceId: "a".repeat(64), recordedAt: 1000, offsetMs: 0, durationMs: 1000 },
   {
@@ -137,7 +145,8 @@ test("each ASR pass selects its own temporary URL and enables resolver", async (
 test("concurrent workers keep source clocks when publishing a batch", async () => {
   const { Repository } = await import("../src/infrastructure/database.js");
   const { Filters } = await import("../src/contracts.js");
-  const { tick } = await import("../src/modules/transcription-jobs/worker.js");
+  const { tick } =
+    await import("../src/modules/transcription-jobs/transcription-jobs.worker.js");
   const repo = new Repository(":memory:");
   const input: JobInput = {
     sourceId: "e".repeat(64),

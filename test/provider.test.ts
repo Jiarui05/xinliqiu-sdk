@@ -1,7 +1,15 @@
-/** Verify the actual HTTP adapter against documented provider wire shapes without uploading any audio. */
+/**
+ * @file provider.test.ts
+ * @description 使用供应商协议样例验证真实 HTTP 适配器，不上传任何音频。
+ *
+ * 职责与入口：
+ * - 行为回归验证 → 本文件的 test() 用例
+ *
+ * 边界：使用合成数据或本机临时目录验证行为，不调用真实付费模型。
+ */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { DashScope } from "../src/modules/transcription-jobs/providers/qwen.js";
+import { DashScope } from "../src/modules/transcription-jobs/providers/qwen.provider.js";
 test("Qwen/Fun payloads and result-file credential isolation", async () => {
   const original = globalThis.fetch;
   const requests: { url: string; body: any; authorization: unknown }[] = [];

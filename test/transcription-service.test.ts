@@ -1,4 +1,12 @@
-/** Exercise provider switching, secret redaction and real wire-format normalization without paid requests. */
+/**
+ * @file transcription-service.test.ts
+ * @description 验证供应商切换、密钥脱敏与协议结果规范化，不发起付费请求。
+ *
+ * 职责与入口：
+ * - 行为回归验证 → 本文件的 test() 用例
+ *
+ * 边界：使用合成数据或本机临时目录验证行为，不调用真实付费模型。
+ */
 import { createHash, randomUUID } from "node:crypto";
 import YAML from "yaml";
 import { test } from "node:test";
@@ -14,14 +22,14 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { TranscriptionConfigs } from "../src/modules/provider-settings/service.js";
+import { TranscriptionConfigs } from "../src/modules/provider-settings/provider-settings.service.js";
 import {
   TencentTranscription,
   DoubaoTranscription,
-} from "../src/modules/transcription-jobs/providers/registry.js";
+} from "../src/modules/transcription-jobs/providers/registry.factory.js";
 import { Repository } from "../src/infrastructure/database.js";
 import { createApp } from "../src/api/app.js";
-import { tick } from "../src/modules/transcription-jobs/worker.js";
+import { tick } from "../src/modules/transcription-jobs/transcription-jobs.worker.js";
 const input = {
   sourceId: "a".repeat(64),
   recordedAt: 1000,
@@ -217,7 +225,7 @@ test("Doubao adapter preserves request UUID and waits for pending jobs", async (
   assert.equal(words[0].speaker, "2");
 });
 
-/** Legacy credentials migrate without rotation, remain private and cannot hide corrupt YAML. */
+/** 验证旧凭据无轮换转换、私有权限保留，以及损坏 YAML 不被忽略。 */
 test("provider JSON migration preserves credentials and rejects corrupt YAML", () => {
   const root = mkdtempSync(join(tmpdir(), "xq-config-migrate-"));
   const folder = join(root, createHash("sha256").update("local").digest("hex"));
