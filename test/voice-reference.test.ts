@@ -4,12 +4,15 @@ import assert from "node:assert/strict";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { VoiceReferences, validateReference } from "../src/voice-reference.js";
-import { TranscriptionConfigs } from "../src/transcription-config.js";
+import {
+  VoiceReferences,
+  validateReference,
+} from "../src/modules/voice-identity/service.js";
+import { TranscriptionConfigs } from "../src/modules/provider-settings/service.js";
 import {
   TencentTranscription,
   tencentWords,
-} from "../src/cloud-transcription.js";
+} from "../src/modules/transcription-jobs/providers/registry.js";
 /** Construct PCM silence solely to test structural validation, never speaker matching. */
 function wav(seconds = 10) {
   const b = Buffer.alloc(44 + seconds * 32000);

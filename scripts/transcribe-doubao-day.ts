@@ -14,12 +14,12 @@ import { join, resolve, basename } from "node:path";
 import { createHash, randomUUID } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { parseArgs } from "node:util";
-import { Repository, type StoredJob } from "../src/repository.js";
-import { TranscriptionConfigs } from "../src/transcription-config.js";
-import { cosReferenceStorage } from "../src/voice-reference.js";
-import { tosReferenceStorage } from "../src/tos-storage.js";
-import type { SourceSegment } from "../src/job-input.js";
-import { groupAudio } from "../src/hourly-policy.js";
+import { Repository, type StoredJob } from "../src/infrastructure/database.js";
+import { TranscriptionConfigs } from "../src/modules/provider-settings/service.js";
+import { cosReferenceStorage } from "../src/modules/voice-identity/service.js";
+import { tosReferenceStorage } from "../src/infrastructure/storage/tos.js";
+import type { SourceSegment } from "../src/modules/transcription-jobs/domain.js";
+import { groupAudio } from "../src/modules/transcription-jobs/hourly-policy.js";
 import type { TimedWord } from "../src/contracts.js";
 const { values } = parseArgs({
   options: {
@@ -352,7 +352,7 @@ try {
       const bytes = prepare(batch);
       const key = `asr-inputs/${batch.id}.wav`;
       await storage.put(key, bytes);
-      repo.enqueue("local", {
+      repo.jobs.enqueue("local", {
         sourceId: batch.id,
         recordedAt: batch.sources[0].recordedAt,
         audioUrl: storage.url(key),

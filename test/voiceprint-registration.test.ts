@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { DoubaoVoiceprints } from "../src/doubao-voiceprint.js";
+import { DoubaoVoiceprints } from "../src/modules/voice-identity/enrollment.js";
 const voiceId = "1b4ff14e-76f0-4bba-9ddc-513078d6539b";
 test("enrollment persists before submit and verifies the returned voice before reuse", async () => {
   const root = mkdtempSync(join(tmpdir(), "xq-enrollment-"));

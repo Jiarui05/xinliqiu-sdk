@@ -7,7 +7,7 @@ const output = "cli-release";
 const version = JSON.parse(readFileSync("package.json", "utf8")).version;
 mkdirSync(output, { recursive: true });
 await build({
-  entryPoints: ["src/cli.ts"],
+  entryPoints: ["src/cli/main.ts"],
   outfile: join(output, "xq.mjs"),
   bundle: true,
   platform: "node",

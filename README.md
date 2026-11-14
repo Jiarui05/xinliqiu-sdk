@@ -1,5 +1,7 @@
 # 心力球转录后端
 
+模块职责、数据兼容边界和发布门禁见 [ARCHITECTURE.md](ARCHITECTURE.md)。
+
 Hono + TypeScript、Scalar、OpenAPI → Orval 客户端、应用 Token、CLI 和 Agent skill。服务器默认只监听 `127.0.0.1:4317`。本机单用户版本使用 SQLite/WAL 持久化任务与文本；无需先开通 PostgreSQL 或 Redis。它不适用于多主机共享 SQLite 文件的部署。
 
 当前实现接受**用户明确提交的 HTTPS 音频 URL**，不会扫描录音库或自动上传音频。音频 URL 必须来自配置的主机白名单，建议使用私有 OSS 的短期签名链接。真实供应商调用已用官方短音频验收，另提供显式本地快照导入，通过同一百炼账号的模型绑定临时存储上传；云端 API 接收本机完成文字的镜像，原音频仍保留在 Mac。结果下载有独立主机白名单，不把 Authorization 转发给结果文件地址；白名单内阿里云 OSS 返回的 HTTP 地址会改用 HTTPS，保留原签名路径和查询参数。
@@ -76,7 +78,7 @@ Hono + TypeScript、Scalar、OpenAPI → Orval 客户端、应用 Token、CLI �
 
 2026-11-11 实际供应商验收：官方约1.7秒示例音频的 Qwen3-ASR 与 Fun-ASR 两项任务均成功。使用原 task_id 恢复结果采集，无重复提交；后端完成持久化，当时先获得9个字符的统计，再读回8个时间词条。返回包含逐字毫秒时间、neutral 情绪和局部说话人编号；零时长词条及对齐不足的说话人保留原值/未知，不补造结果。这个短样本不代表长录音识别精度。
 
-`src/summary.ts` 提供有输入预算与来源检查的 AI SDK 文本总结适配器，当前没有自动触发或HTTP总结接口，不把它当成已上线总结功能。
+`src/modules/summaries/service.ts` 提供有输入预算与来源检查的 AI SDK 文本总结适配器，当前没有自动触发或HTTP总结接口，不把它当成已上线总结功能。
 
 官方能力参考：[非实时语音识别](https://help.aliyun.com/zh/model-studio/non-realtime-speech-recognition-user-guide)、[Qwen-ASR](https://help.aliyun.com/zh/model-studio/qwen-asr-api-reference)、[Fun-ASR](https://help.aliyun.com/zh/model-studio/fun-asr-recorded-speech-recognition-http-api)。新部署需核对所属地域、模型授权与实际费用；用户自己的心力球录音仍需配置可读取的音频地址后单独验收。
 

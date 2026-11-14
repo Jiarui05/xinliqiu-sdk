@@ -16,6 +16,9 @@ def main():
     remote_name = os.environ.get("XQ_DEPLOY_REMOTE", "cloud")
     if git("status", "--porcelain", "--", "server"):
         raise SystemExit("Commit server changes before publishing")
+    subprocess.run(["pnpm", "--dir", "server", "check"], check=True)
+    if git("status", "--porcelain", "--", "server"):
+        raise SystemExit("Release checks changed server files; commit before publishing")
     branch = "deploy/transcript-service"
     tree = git("rev-parse", "HEAD:server")
     remote = git("ls-remote", "--heads", remote_name, "refs/heads/" + branch)

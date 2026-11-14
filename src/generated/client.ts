@@ -57,6 +57,26 @@ export type SaveVoiceReference409 = {
   error: SaveVoiceReference409Error;
 };
 
+export type SaveVoiceReference413Error = {
+  code: string;
+  message: string;
+  requestId: string;
+};
+
+export type SaveVoiceReference413 = {
+  error: SaveVoiceReference413Error;
+};
+
+export type SaveVoiceReference500Error = {
+  code: string;
+  message: string;
+  requestId: string;
+};
+
+export type SaveVoiceReference500 = {
+  error: SaveVoiceReference500Error;
+};
+
 export type SaveVoiceReference503Error = {
   code: string;
   message: string;
@@ -164,6 +184,26 @@ export type GetTranscriptionService409 = {
   error: GetTranscriptionService409Error;
 };
 
+export type GetTranscriptionService413Error = {
+  code: string;
+  message: string;
+  requestId: string;
+};
+
+export type GetTranscriptionService413 = {
+  error: GetTranscriptionService413Error;
+};
+
+export type GetTranscriptionService500Error = {
+  code: string;
+  message: string;
+  requestId: string;
+};
+
+export type GetTranscriptionService500 = {
+  error: GetTranscriptionService500Error;
+};
+
 export type GetTranscriptionService503Error = {
   code: string;
   message: string;
@@ -267,6 +307,26 @@ export type SaveTranscriptionService409 = {
   error: SaveTranscriptionService409Error;
 };
 
+export type SaveTranscriptionService413Error = {
+  code: string;
+  message: string;
+  requestId: string;
+};
+
+export type SaveTranscriptionService413 = {
+  error: SaveTranscriptionService413Error;
+};
+
+export type SaveTranscriptionService500Error = {
+  code: string;
+  message: string;
+  requestId: string;
+};
+
+export type SaveTranscriptionService500 = {
+  error: SaveTranscriptionService500Error;
+};
+
 export type SaveTranscriptionService503Error = {
   code: string;
   message: string;
@@ -321,6 +381,26 @@ export type GetMe409 = {
   error: GetMe409Error;
 };
 
+export type GetMe413Error = {
+  code: string;
+  message: string;
+  requestId: string;
+};
+
+export type GetMe413 = {
+  error: GetMe413Error;
+};
+
+export type GetMe500Error = {
+  code: string;
+  message: string;
+  requestId: string;
+};
+
+export type GetMe500 = {
+  error: GetMe500Error;
+};
+
 export type GetMe503Error = {
   code: string;
   message: string;
@@ -373,6 +453,26 @@ export type Logout409Error = {
 
 export type Logout409 = {
   error: Logout409Error;
+};
+
+export type Logout413Error = {
+  code: string;
+  message: string;
+  requestId: string;
+};
+
+export type Logout413 = {
+  error: Logout413Error;
+};
+
+export type Logout500Error = {
+  code: string;
+  message: string;
+  requestId: string;
+};
+
+export type Logout500 = {
+  error: Logout500Error;
 };
 
 export type Logout503Error = {
@@ -462,6 +562,26 @@ export type GetTranscriptStats409Error = {
 
 export type GetTranscriptStats409 = {
   error: GetTranscriptStats409Error;
+};
+
+export type GetTranscriptStats413Error = {
+  code: string;
+  message: string;
+  requestId: string;
+};
+
+export type GetTranscriptStats413 = {
+  error: GetTranscriptStats413Error;
+};
+
+export type GetTranscriptStats500Error = {
+  code: string;
+  message: string;
+  requestId: string;
+};
+
+export type GetTranscriptStats500 = {
+  error: GetTranscriptStats500Error;
 };
 
 export type GetTranscriptStats503Error = {
@@ -626,6 +746,26 @@ export type GetTranscripts409 = {
   error: GetTranscripts409Error;
 };
 
+export type GetTranscripts413Error = {
+  code: string;
+  message: string;
+  requestId: string;
+};
+
+export type GetTranscripts413 = {
+  error: GetTranscripts413Error;
+};
+
+export type GetTranscripts500Error = {
+  code: string;
+  message: string;
+  requestId: string;
+};
+
+export type GetTranscripts500 = {
+  error: GetTranscripts500Error;
+};
+
 export type GetTranscripts503Error = {
   code: string;
   message: string;
@@ -726,6 +866,26 @@ export type SubmitTranscriptionBatch409 = {
   error: SubmitTranscriptionBatch409Error;
 };
 
+export type SubmitTranscriptionBatch413Error = {
+  code: string;
+  message: string;
+  requestId: string;
+};
+
+export type SubmitTranscriptionBatch413 = {
+  error: SubmitTranscriptionBatch413Error;
+};
+
+export type SubmitTranscriptionBatch500Error = {
+  code: string;
+  message: string;
+  requestId: string;
+};
+
+export type SubmitTranscriptionBatch500 = {
+  error: SubmitTranscriptionBatch500Error;
+};
+
 export type SubmitTranscriptionBatch503Error = {
   code: string;
   message: string;
@@ -782,6 +942,26 @@ export type GetJob409Error = {
 
 export type GetJob409 = {
   error: GetJob409Error;
+};
+
+export type GetJob413Error = {
+  code: string;
+  message: string;
+  requestId: string;
+};
+
+export type GetJob413 = {
+  error: GetJob413Error;
+};
+
+export type GetJob500Error = {
+  code: string;
+  message: string;
+  requestId: string;
+};
+
+export type GetJob500 = {
+  error: GetJob500Error;
 };
 
 export type GetJob503Error = {
@@ -912,6 +1092,26 @@ export type MirrorTranscripts409 = {
   error: MirrorTranscripts409Error;
 };
 
+export type MirrorTranscripts413Error = {
+  code: string;
+  message: string;
+  requestId: string;
+};
+
+export type MirrorTranscripts413 = {
+  error: MirrorTranscripts413Error;
+};
+
+export type MirrorTranscripts500Error = {
+  code: string;
+  message: string;
+  requestId: string;
+};
+
+export type MirrorTranscripts500 = {
+  error: MirrorTranscripts500Error;
+};
+
 export type MirrorTranscripts503Error = {
   code: string;
   message: string;
@@ -947,6 +1147,16 @@ export type saveVoiceReferenceResponse409 = {
   status: 409
 }
 
+export type saveVoiceReferenceResponse413 = {
+  data: SaveVoiceReference413
+  status: 413
+}
+
+export type saveVoiceReferenceResponse500 = {
+  data: SaveVoiceReference500
+  status: 500
+}
+
 export type saveVoiceReferenceResponse503 = {
   data: SaveVoiceReference503
   status: 503
@@ -955,7 +1165,7 @@ export type saveVoiceReferenceResponse503 = {
 export type saveVoiceReferenceResponseSuccess = (saveVoiceReferenceResponse200) & {
   headers: Headers;
 };
-export type saveVoiceReferenceResponseError = (saveVoiceReferenceResponse400 | saveVoiceReferenceResponse401 | saveVoiceReferenceResponse404 | saveVoiceReferenceResponse409 | saveVoiceReferenceResponse503) & {
+export type saveVoiceReferenceResponseError = (saveVoiceReferenceResponse400 | saveVoiceReferenceResponse401 | saveVoiceReferenceResponse404 | saveVoiceReferenceResponse409 | saveVoiceReferenceResponse413 | saveVoiceReferenceResponse500 | saveVoiceReferenceResponse503) & {
   headers: Headers;
 };
 
@@ -1028,6 +1238,16 @@ export type getTranscriptionServiceResponse409 = {
   status: 409
 }
 
+export type getTranscriptionServiceResponse413 = {
+  data: GetTranscriptionService413
+  status: 413
+}
+
+export type getTranscriptionServiceResponse500 = {
+  data: GetTranscriptionService500
+  status: 500
+}
+
 export type getTranscriptionServiceResponse503 = {
   data: GetTranscriptionService503
   status: 503
@@ -1036,7 +1256,7 @@ export type getTranscriptionServiceResponse503 = {
 export type getTranscriptionServiceResponseSuccess = (getTranscriptionServiceResponse200) & {
   headers: Headers;
 };
-export type getTranscriptionServiceResponseError = (getTranscriptionServiceResponse400 | getTranscriptionServiceResponse401 | getTranscriptionServiceResponse404 | getTranscriptionServiceResponse409 | getTranscriptionServiceResponse503) & {
+export type getTranscriptionServiceResponseError = (getTranscriptionServiceResponse400 | getTranscriptionServiceResponse401 | getTranscriptionServiceResponse404 | getTranscriptionServiceResponse409 | getTranscriptionServiceResponse413 | getTranscriptionServiceResponse500 | getTranscriptionServiceResponse503) & {
   headers: Headers;
 };
 
@@ -1095,6 +1315,16 @@ export type saveTranscriptionServiceResponse409 = {
   status: 409
 }
 
+export type saveTranscriptionServiceResponse413 = {
+  data: SaveTranscriptionService413
+  status: 413
+}
+
+export type saveTranscriptionServiceResponse500 = {
+  data: SaveTranscriptionService500
+  status: 500
+}
+
 export type saveTranscriptionServiceResponse503 = {
   data: SaveTranscriptionService503
   status: 503
@@ -1103,7 +1333,7 @@ export type saveTranscriptionServiceResponse503 = {
 export type saveTranscriptionServiceResponseSuccess = (saveTranscriptionServiceResponse200) & {
   headers: Headers;
 };
-export type saveTranscriptionServiceResponseError = (saveTranscriptionServiceResponse400 | saveTranscriptionServiceResponse401 | saveTranscriptionServiceResponse404 | saveTranscriptionServiceResponse409 | saveTranscriptionServiceResponse503) & {
+export type saveTranscriptionServiceResponseError = (saveTranscriptionServiceResponse400 | saveTranscriptionServiceResponse401 | saveTranscriptionServiceResponse404 | saveTranscriptionServiceResponse409 | saveTranscriptionServiceResponse413 | saveTranscriptionServiceResponse500 | saveTranscriptionServiceResponse503) & {
   headers: Headers;
 };
 
@@ -1176,6 +1406,16 @@ export type getMeResponse409 = {
   status: 409
 }
 
+export type getMeResponse413 = {
+  data: GetMe413
+  status: 413
+}
+
+export type getMeResponse500 = {
+  data: GetMe500
+  status: 500
+}
+
 export type getMeResponse503 = {
   data: GetMe503
   status: 503
@@ -1184,7 +1424,7 @@ export type getMeResponse503 = {
 export type getMeResponseSuccess = (getMeResponse200) & {
   headers: Headers;
 };
-export type getMeResponseError = (getMeResponse400 | getMeResponse401 | getMeResponse404 | getMeResponse409 | getMeResponse503) & {
+export type getMeResponseError = (getMeResponse400 | getMeResponse401 | getMeResponse404 | getMeResponse409 | getMeResponse413 | getMeResponse500 | getMeResponse503) & {
   headers: Headers;
 };
 
@@ -1243,6 +1483,16 @@ export type logoutResponse409 = {
   status: 409
 }
 
+export type logoutResponse413 = {
+  data: Logout413
+  status: 413
+}
+
+export type logoutResponse500 = {
+  data: Logout500
+  status: 500
+}
+
 export type logoutResponse503 = {
   data: Logout503
   status: 503
@@ -1251,7 +1501,7 @@ export type logoutResponse503 = {
 export type logoutResponseSuccess = (logoutResponse200) & {
   headers: Headers;
 };
-export type logoutResponseError = (logoutResponse400 | logoutResponse401 | logoutResponse404 | logoutResponse409 | logoutResponse503) & {
+export type logoutResponseError = (logoutResponse400 | logoutResponse401 | logoutResponse404 | logoutResponse409 | logoutResponse413 | logoutResponse500 | logoutResponse503) & {
   headers: Headers;
 };
 
@@ -1310,6 +1560,16 @@ export type getTranscriptStatsResponse409 = {
   status: 409
 }
 
+export type getTranscriptStatsResponse413 = {
+  data: GetTranscriptStats413
+  status: 413
+}
+
+export type getTranscriptStatsResponse500 = {
+  data: GetTranscriptStats500
+  status: 500
+}
+
 export type getTranscriptStatsResponse503 = {
   data: GetTranscriptStats503
   status: 503
@@ -1318,7 +1578,7 @@ export type getTranscriptStatsResponse503 = {
 export type getTranscriptStatsResponseSuccess = (getTranscriptStatsResponse200) & {
   headers: Headers;
 };
-export type getTranscriptStatsResponseError = (getTranscriptStatsResponse400 | getTranscriptStatsResponse401 | getTranscriptStatsResponse404 | getTranscriptStatsResponse409 | getTranscriptStatsResponse503) & {
+export type getTranscriptStatsResponseError = (getTranscriptStatsResponse400 | getTranscriptStatsResponse401 | getTranscriptStatsResponse404 | getTranscriptStatsResponse409 | getTranscriptStatsResponse413 | getTranscriptStatsResponse500 | getTranscriptStatsResponse503) & {
   headers: Headers;
 };
 
@@ -1384,6 +1644,16 @@ export type getTranscriptsResponse409 = {
   status: 409
 }
 
+export type getTranscriptsResponse413 = {
+  data: GetTranscripts413
+  status: 413
+}
+
+export type getTranscriptsResponse500 = {
+  data: GetTranscripts500
+  status: 500
+}
+
 export type getTranscriptsResponse503 = {
   data: GetTranscripts503
   status: 503
@@ -1392,7 +1662,7 @@ export type getTranscriptsResponse503 = {
 export type getTranscriptsResponseSuccess = (getTranscriptsResponse200) & {
   headers: Headers;
 };
-export type getTranscriptsResponseError = (getTranscriptsResponse400 | getTranscriptsResponse401 | getTranscriptsResponse404 | getTranscriptsResponse409 | getTranscriptsResponse503) & {
+export type getTranscriptsResponseError = (getTranscriptsResponse400 | getTranscriptsResponse401 | getTranscriptsResponse404 | getTranscriptsResponse409 | getTranscriptsResponse413 | getTranscriptsResponse500 | getTranscriptsResponse503) & {
   headers: Headers;
 };
 
@@ -1458,6 +1728,16 @@ export type submitTranscriptionBatchResponse409 = {
   status: 409
 }
 
+export type submitTranscriptionBatchResponse413 = {
+  data: SubmitTranscriptionBatch413
+  status: 413
+}
+
+export type submitTranscriptionBatchResponse500 = {
+  data: SubmitTranscriptionBatch500
+  status: 500
+}
+
 export type submitTranscriptionBatchResponse503 = {
   data: SubmitTranscriptionBatch503
   status: 503
@@ -1466,7 +1746,7 @@ export type submitTranscriptionBatchResponse503 = {
 export type submitTranscriptionBatchResponseSuccess = (submitTranscriptionBatchResponse202) & {
   headers: Headers;
 };
-export type submitTranscriptionBatchResponseError = (submitTranscriptionBatchResponse400 | submitTranscriptionBatchResponse401 | submitTranscriptionBatchResponse404 | submitTranscriptionBatchResponse409 | submitTranscriptionBatchResponse503) & {
+export type submitTranscriptionBatchResponseError = (submitTranscriptionBatchResponse400 | submitTranscriptionBatchResponse401 | submitTranscriptionBatchResponse404 | submitTranscriptionBatchResponse409 | submitTranscriptionBatchResponse413 | submitTranscriptionBatchResponse500 | submitTranscriptionBatchResponse503) & {
   headers: Headers;
 };
 
@@ -1539,6 +1819,16 @@ export type getJobResponse409 = {
   status: 409
 }
 
+export type getJobResponse413 = {
+  data: GetJob413
+  status: 413
+}
+
+export type getJobResponse500 = {
+  data: GetJob500
+  status: 500
+}
+
 export type getJobResponse503 = {
   data: GetJob503
   status: 503
@@ -1547,7 +1837,7 @@ export type getJobResponse503 = {
 export type getJobResponseSuccess = (getJobResponse200) & {
   headers: Headers;
 };
-export type getJobResponseError = (getJobResponse400 | getJobResponse401 | getJobResponse404 | getJobResponse409 | getJobResponse503) & {
+export type getJobResponseError = (getJobResponse400 | getJobResponse401 | getJobResponse404 | getJobResponse409 | getJobResponse413 | getJobResponse500 | getJobResponse503) & {
   headers: Headers;
 };
 
@@ -1606,6 +1896,16 @@ export type mirrorTranscriptsResponse409 = {
   status: 409
 }
 
+export type mirrorTranscriptsResponse413 = {
+  data: MirrorTranscripts413
+  status: 413
+}
+
+export type mirrorTranscriptsResponse500 = {
+  data: MirrorTranscripts500
+  status: 500
+}
+
 export type mirrorTranscriptsResponse503 = {
   data: MirrorTranscripts503
   status: 503
@@ -1614,7 +1914,7 @@ export type mirrorTranscriptsResponse503 = {
 export type mirrorTranscriptsResponseSuccess = (mirrorTranscriptsResponse200) & {
   headers: Headers;
 };
-export type mirrorTranscriptsResponseError = (mirrorTranscriptsResponse400 | mirrorTranscriptsResponse401 | mirrorTranscriptsResponse404 | mirrorTranscriptsResponse409 | mirrorTranscriptsResponse503) & {
+export type mirrorTranscriptsResponseError = (mirrorTranscriptsResponse400 | mirrorTranscriptsResponse401 | mirrorTranscriptsResponse404 | mirrorTranscriptsResponse409 | mirrorTranscriptsResponse413 | mirrorTranscriptsResponse500 | mirrorTranscriptsResponse503) & {
   headers: Headers;
 };
 

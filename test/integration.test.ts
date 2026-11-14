@@ -7,22 +7,22 @@ import { promisify } from "node:util";
 import { mkdtempSync, writeFileSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { Repository } from "../src/repository.js";
+import { Repository } from "../src/infrastructure/database.js";
 import { createApp } from "../src/app.js";
-import { Client } from "../src/client.js";
+import { Client } from "../src/cli/client.js";
 const exec = promisify(execFile);
 test("HTTP → generated client → CLI → bounded sidecar", async () => {
   const repo = new Repository(":memory:"),
     token = "synthetic-integration-token-not-a-real-secret",
     id = "b".repeat(64);
-  repo.token(token, "local");
-  repo.enqueue("local", {
+  repo.auth.token(token, "local");
+  repo.jobs.enqueue("local", {
     sourceId: id,
     audioUrl: "https://example.test/a.wav",
     recordedAt: 1000,
     mode: "emotion",
   });
-  repo.complete(repo.claim()!, [
+  repo.jobs.complete(repo.jobs.claim()!, [
     {
       text: "测试",
       startMs: 500,
@@ -61,7 +61,7 @@ test("HTTP → generated client → CLI → bounded sidecar", async () => {
           [
             "--import",
             "tsx",
-            "src/cli.ts",
+            "src/cli/main.ts",
             "transcript",
             "+inspect",
             "--source-id",
@@ -82,7 +82,7 @@ test("HTTP → generated client → CLI → bounded sidecar", async () => {
       [
         "--import",
         "tsx",
-        "src/cli.ts",
+        "src/cli/main.ts",
         "transcript",
         "+pull",
         "--source-id",
@@ -100,7 +100,14 @@ test("HTTP → generated client → CLI → bounded sidecar", async () => {
     assert.equal(local.words[0].timing, "word");
     const dry = await exec(
       process.execPath,
-      ["--import", "tsx", "src/cli.ts", "--dry-run", "transcript", "+inspect"],
+      [
+        "--import",
+        "tsx",
+        "src/cli/main.ts",
+        "--dry-run",
+        "transcript",
+        "+inspect",
+      ],
       { env: { ...env, XQ_API_URL: "http://127.0.0.1:1", XQ_TOKEN: "" } },
     );
     assert.equal(JSON.parse(dry.stdout).method, "GET");

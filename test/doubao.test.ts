@@ -8,10 +8,10 @@ import { createHash } from "node:crypto";
 import {
   DoubaoTranscription,
   doubaoWords,
-} from "../src/cloud-transcription.js";
-import { TranscriptionConfigs } from "../src/transcription-config.js";
-import { Repository } from "../src/repository.js";
-import { tick } from "../src/worker.js";
+} from "../src/modules/transcription-jobs/providers/registry.js";
+import { TranscriptionConfigs } from "../src/modules/provider-settings/service.js";
+import { Repository } from "../src/infrastructure/database.js";
+import { tick } from "../src/modules/transcription-jobs/worker.js";
 const config = {
   id: "test",
   provider: "doubao" as const,
@@ -79,7 +79,7 @@ test("local turbo upload preserves dialect options and completes durably in one 
         { headers: { "X-Api-Status-Code": "20000000" } },
       );
     });
-    const job = repo.enqueue("local", {
+    const job = repo.jobs.enqueue("local", {
       ...input,
       localAudio: {
         path,
@@ -87,7 +87,7 @@ test("local turbo upload preserves dialect options and completes durably in one 
       },
     });
     await tick(repo, p);
-    assert.equal(repo.job("local", job.id)?.state, "completed");
+    assert.equal(repo.jobs.job("local", job.id)?.state, "completed");
     await tick(repo, p);
     assert.equal(calls, 1);
     assert.equal(repo.db.prepare("SELECT count(*) n FROM words").get()?.n, 1);
@@ -113,9 +113,9 @@ test("unknown synchronous submission is never automatically repeated", async () 
     },
   );
   try {
-    const job = repo.enqueue("local", input);
+    const job = repo.jobs.enqueue("local", input);
     await tick(repo, p);
-    assert.equal(repo.job("local", job.id)?.state, "submission_unknown");
+    assert.equal(repo.jobs.job("local", job.id)?.state, "submission_unknown");
     await tick(repo, p);
     assert.equal(calls, 1);
   } finally {

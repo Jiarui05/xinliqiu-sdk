@@ -1,7 +1,7 @@
 /** Verify the actual HTTP adapter against documented provider wire shapes without uploading any audio. */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { DashScope } from "../src/provider.js";
+import { DashScope } from "../src/modules/transcription-jobs/providers/qwen.js";
 test("Qwen/Fun payloads and result-file credential isolation", async () => {
   const original = globalThis.fetch;
   const requests: { url: string; body: any; authorization: unknown }[] = [];

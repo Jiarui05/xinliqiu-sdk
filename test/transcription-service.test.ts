@@ -14,14 +14,14 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { TranscriptionConfigs } from "../src/transcription-config.js";
+import { TranscriptionConfigs } from "../src/modules/provider-settings/service.js";
 import {
   TencentTranscription,
   DoubaoTranscription,
-} from "../src/cloud-transcription.js";
-import { Repository } from "../src/repository.js";
+} from "../src/modules/transcription-jobs/providers/registry.js";
+import { Repository } from "../src/infrastructure/database.js";
 import { createApp } from "../src/app.js";
-import { tick } from "../src/worker.js";
+import { tick } from "../src/modules/transcription-jobs/worker.js";
 const input = {
   sourceId: "a".repeat(64),
   recordedAt: 1000,
@@ -34,7 +34,7 @@ test("settings API redacts secrets and retains immutable task configuration afte
     store = new TranscriptionConfigs(root),
     repo = new Repository(":memory:");
   const token = "synthetic-test-token-for-provider-settings";
-  repo.token(token, "local");
+  repo.auth.token(token, "local");
   const app = createApp(repo, {
     providerConfigured: false,
     audioHosts: ["audio.example.test"],
@@ -69,7 +69,7 @@ test("settings API redacts secrets and retains immutable task configuration afte
       body: JSON.stringify({ recordings: [input] }),
     });
     assert.equal(r.status, 202);
-    const queued = repo.claim()!;
+    const queued = repo.jobs.claim()!;
     assert.equal(JSON.parse(queued.input).serviceConfigId, first.id);
     const second = store.save("local", {
       provider: "qwen",
@@ -151,7 +151,7 @@ test("Tencent adapter signs requests and maps sentence-relative word timestamps"
   assert.equal(requests[0].body.ResTextFormat, 2);
   const repo = new Repository(":memory:");
   try {
-    repo.enqueue("test", input);
+    repo.jobs.enqueue("test", input);
     await tick(repo, provider);
     assert.equal(
       repo.db.prepare("select state from jobs").get()!.state,

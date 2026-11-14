@@ -5,7 +5,7 @@ import {
   HOURLY_AUDIO_MS,
   pendingAudioMs,
   groupAudio,
-} from "../src/hourly-policy.js";
+} from "../src/modules/transcription-jobs/hourly-policy.js";
 test("only verified unscheduled recording time contributes to the one-hour threshold", () => {
   const records = [
     { id: "a", startMS: 200, name: "normal" },

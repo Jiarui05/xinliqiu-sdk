@@ -11,7 +11,7 @@ COPY scripts ./scripts
 COPY test ./test
 COPY skill ./skill
 COPY openapi.json ./openapi.json
-RUN pnpm exec tsc --noEmit false --outDir dist && pnpm cli:build && pnpm prune --prod
+RUN pnpm check && pnpm exec tsc --noEmit false --outDir dist && pnpm prune --prod
 
 # Personal audio and credentials are mounted at runtime, never baked into the image.
 FROM node:24-bookworm-slim

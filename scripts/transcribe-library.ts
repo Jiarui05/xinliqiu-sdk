@@ -14,13 +14,13 @@ import { resolve, join, dirname, basename } from "node:path";
 import { createHash, randomUUID } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { parseArgs } from "node:util";
-import { Repository, type StoredJob } from "../src/repository.js";
-import { temporaryUpload } from "../src/temporary-upload.js";
+import { Repository, type StoredJob } from "../src/infrastructure/database.js";
+import { temporaryUpload } from "../src/infrastructure/storage/temporary-upload.js";
 import {
   validateSources,
   type JobInput,
   type SourceSegment,
-} from "../src/job-input.js";
+} from "../src/modules/transcription-jobs/domain.js";
 import type { TimedWord } from "../src/contracts.js";
 /** Local manifest paths never enter the HTTP API or the provider's object names. */
 type Source = SourceSegment & {
@@ -229,7 +229,7 @@ async function enqueue(batch: Batch) {
       }),
     ),
   };
-  repo.enqueue(manifest.owner, input);
+  repo.jobs.enqueue(manifest.owner, input);
 }
 /** Keep one bounded group in flight; stop creating work if any uncertain or failed submission appears. */
 async function run() {

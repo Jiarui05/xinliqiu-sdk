@@ -8,17 +8,18 @@
   },
   "scripts": {
     "dev": "tsx src/server.ts",
-    "cli": "tsx src/cli.ts",
+    "cli": "tsx src/cli/main.ts",
     "bootstrap": "tsx src/bootstrap.ts",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test test/*.test.ts",
     "openapi:generate": "tsx scripts/openapi.ts",
     "client:generate": "pnpm openapi:generate && orval",
-    "check": "pnpm typecheck && pnpm cli:build && pnpm test",
+    "check": "pnpm typecheck && pnpm contract:check && pnpm cli:build && pnpm test",
     "library:plan": "tsx scripts/plan-library.ts",
     "library:transcribe": "tsx scripts/transcribe-library.ts",
     "cli:build": "tsx scripts/build-cli.ts",
-    "cloud:publish": "python3 scripts/publish-cloud.py"
+    "cloud:publish": "python3 scripts/publish-cloud.py",
+    "contract:check": "tsx scripts/check-generated.ts"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^3.0.87",

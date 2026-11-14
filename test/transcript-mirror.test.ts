@@ -1,15 +1,15 @@
 /** Verify text replication preserves owner isolation, revision replacement and count-first reads. */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { Repository } from "../src/repository.js";
+import { Repository } from "../src/infrastructure/database.js";
 import { createApp } from "../src/app.js";
 
 test("mirror is authenticated, idempotent and never schedules ASR", async () => {
   const repo = new Repository(":memory:");
   const token = "synthetic-cloud-mirror-token-000000000";
   const other = "synthetic-cloud-mirror-token-111111111";
-  repo.token(token, "a");
-  repo.token(other, "b");
+  repo.auth.token(token, "a");
+  repo.auth.token(other, "b");
   const app = createApp(repo, { providerConfigured: false, audioHosts: [] });
   const headers = {
     Authorization: `Bearer ${token}`,

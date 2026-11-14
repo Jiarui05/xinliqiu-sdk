@@ -11,12 +11,12 @@ import {
 import { join, basename, resolve, relative } from "node:path";
 import { createHash, randomUUID } from "node:crypto";
 import { parseArgs } from "node:util";
-import { Repository } from "../src/repository.js";
-import { TranscriptionConfigs } from "../src/transcription-config.js";
-import { configuredProvider } from "../src/cloud-transcription.js";
-import { cosReferenceStorage } from "../src/voice-reference.js";
-import { tosReferenceStorage } from "../src/tos-storage.js";
-import { tick } from "../src/worker.js";
+import { Repository } from "../src/infrastructure/database.js";
+import { TranscriptionConfigs } from "../src/modules/provider-settings/service.js";
+import { configuredProvider } from "../src/modules/transcription-jobs/providers/registry.js";
+import { cosReferenceStorage } from "../src/modules/voice-identity/service.js";
+import { tosReferenceStorage } from "../src/infrastructure/storage/tos.js";
+import { tick } from "../src/modules/transcription-jobs/worker.js";
 import type { TimedWord } from "../src/contracts.js";
 const { values } = parseArgs({
   options: {
@@ -83,7 +83,7 @@ if (
 mkdirSync(folder, { recursive: true, mode: 0o700 });
 const repo = new Repository(join(folder, "evaluation.sqlite"));
 try {
-  const job = repo.enqueue("local", {
+  const job = repo.jobs.enqueue("local", {
     sourceId: record.id,
     recordedAt: record.startMS,
     audioUrl: "https://local.invalid/verified.wav",
@@ -92,7 +92,7 @@ try {
     serviceConfigId: id,
     localAudio: { path, sha256: audio.sha256 },
   });
-  const before = repo.job("local", job.id)!;
+  const before = repo.jobs.job("local", job.id)!;
   if (before.state === "queued" || before.state === "running")
     await tick(
       repo,
@@ -103,7 +103,7 @@ try {
         tosReferenceStorage() ?? cosReferenceStorage(),
       ),
     );
-  const result = repo.job("local", job.id)!;
+  const result = repo.jobs.job("local", job.id)!;
   if (result.state !== "completed") {
     console.log(JSON.stringify(result));
     process.exitCode = 3;

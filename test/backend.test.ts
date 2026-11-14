@@ -1,11 +1,15 @@
 /** Acceptance tests for ownership, output budgets, provider contracts and crash-safe asynchronous work. */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { Repository } from "../src/repository.js";
+import { Repository } from "../src/infrastructure/database.js";
 import { createApp } from "../src/app.js";
 import { Filters, Stats, Page } from "../src/contracts.js";
-import { normalize, combine, type Provider } from "../src/provider.js";
-import { tick } from "../src/worker.js";
+import {
+  normalize,
+  combine,
+  type Provider,
+} from "../src/modules/transcription-jobs/providers/qwen.js";
+import { tick } from "../src/modules/transcription-jobs/worker.js";
 const token = "synthetic-application-token-owner-a-12345",
   other = "synthetic-application-token-owner-b-67890";
 const source = "a".repeat(64),
@@ -32,8 +36,8 @@ const raw = (text = "你好", speaker?: number) => ({
 });
 function setup() {
   const repo = new Repository(":memory:");
-  repo.token(token, "a");
-  repo.token(other, "b");
+  repo.auth.token(token, "a");
+  repo.auth.token(other, "b");
   return {
     repo,
     app: createApp(repo, {
@@ -47,14 +51,14 @@ const headers = {
   "Content-Type": "application/json",
 };
 async function seed(repo: Repository, text = "你好") {
-  repo.enqueue("a", {
+  repo.jobs.enqueue("a", {
     sourceId: source,
     recordedAt: 100000,
     audioUrl,
     mode: "rich",
   });
-  const job = repo.claim()!;
-  repo.complete(job, normalize(raw(text, 0)));
+  const job = repo.jobs.claim()!;
+  repo.jobs.complete(job, normalize(raw(text, 0)));
 }
 
 test("authentication, revocation and owner isolation apply to stats and jobs", async () => {
@@ -84,7 +88,7 @@ test("authentication, revocation and owner isolation apply to stats and jobs", a
 test("root reads are bounded and support phrase/time filters without a query credential", async () => {
   const { repo, app } = setup();
   await seed(repo, "你" + "好".repeat(1200));
-  const stats = repo.stats(
+  const stats = repo.transcripts.stats(
     "a",
     Filters.parse({ q: "你好", from: 100000, to: 101001 }),
   );
@@ -99,7 +103,13 @@ test("root reads are bounded and support phrase/time filters without a query cre
   let n = first.charCount,
     cursor = first.nextCursor;
   while (cursor !== null) {
-    const page = repo.read("a", Filters.parse({}), cursor, 256, 100);
+    const page = repo.transcripts.read(
+      "a",
+      Filters.parse({}),
+      cursor,
+      256,
+      100,
+    );
     assert.ok(page.items.length);
     n += page.charCount;
     cursor = page.nextCursor;
@@ -109,7 +119,9 @@ test("root reads are bounded and support phrase/time filters without a query cre
     (await app.request(`/v1/transcripts?maxChars=999999`, { headers })).status,
     400,
   );
-  assert.ok(repo.read("a", Filters.parse({}), 0, 2000, 100).items.length);
+  assert.ok(
+    repo.transcripts.read("a", Filters.parse({}), 0, 2000, 100).items.length,
+  );
   repo.db.close();
 });
 test("root tokens do not expire automatically and direct reads need no stats request", async () => {
@@ -126,10 +138,13 @@ test("root tokens do not expire automatically and direct reads need no stats req
     "你好",
   );
   assert.equal(
-    Object.hasOwn(repo.stats("a", Filters.parse({})), "inspectionId"),
+    Object.hasOwn(
+      repo.transcripts.stats("a", Filters.parse({})),
+      "inspectionId",
+    ),
     false,
   );
-  repo.revoke(token);
+  repo.auth.revoke(token);
   assert.equal((await app.request("/v1/transcripts", { headers })).status, 401);
   repo.db.close();
 });
@@ -155,7 +170,7 @@ test("batch submissions deduplicate, reject conflicting metadata and disallow un
 });
 test("a rich job submits two different capabilities then persists normalized words", async () => {
   const repo = new Repository(":memory:");
-  repo.enqueue("a", {
+  repo.jobs.enqueue("a", {
     sourceId: source,
     recordedAt: 1,
     audioUrl,
@@ -171,20 +186,21 @@ test("a rich job submits two different capabilities then persists normalized wor
   };
   await tick(repo, provider);
   assert.deepEqual(submissions, ["emotion", "speakers"]);
-  const stats = repo.stats(
+  const stats = repo.transcripts.stats(
     "a",
     Filters.parse({ speaker: "1", emotion: "happy" }),
   );
   assert.equal(stats.charCount, 2);
   assert.equal(
-    repo.read("a", Filters.parse({}), 0, 2000, 100).items[0].word.speakerSource,
+    repo.transcripts.read("a", Filters.parse({}), 0, 2000, 100).items[0].word
+      .speakerSource,
     "overlap",
   );
   repo.db.close();
 });
 test("submission timeout is not retried, and expired submitting lease becomes unknown", async () => {
   const repo = new Repository(":memory:");
-  repo.enqueue("a", {
+  repo.jobs.enqueue("a", {
     sourceId: source,
     recordedAt: 1,
     audioUrl,
@@ -205,7 +221,7 @@ test("submission timeout is not retried, and expired submitting lease becomes un
   assert.equal(row?.state, "submission_unknown");
   assert.ok(!String(row?.error).includes("private"));
   repo.db.prepare("UPDATE jobs SET state='submitting',lease=0").run();
-  assert.equal(repo.claim(), undefined);
+  assert.equal(repo.jobs.claim(), undefined);
   assert.equal(
     repo.db.prepare("SELECT state FROM jobs").get()?.state,
     "submission_unknown",
@@ -214,14 +230,14 @@ test("submission timeout is not retried, and expired submitting lease becomes un
 });
 test("known provider task resumes without a second submission after worker interruption", async () => {
   const repo = new Repository(":memory:");
-  repo.enqueue("a", {
+  repo.jobs.enqueue("a", {
     sourceId: source,
     recordedAt: 1,
     audioUrl,
     mode: "emotion",
   });
-  const job = repo.claim()!;
-  repo.update(job, "running", { emotion: "saved-task" }, {});
+  const job = repo.jobs.claim()!;
+  repo.jobs.update(job, "running", { emotion: "saved-task" }, {});
   let submits = 0;
   await tick(repo, {
     submit: async () => {
@@ -277,15 +293,15 @@ test("word-level spans are preserved, missing timestamps and ambiguous speakers 
 test("retranscription replaces affected sources and rolls back invalid output", async () => {
   const { repo } = setup();
   await seed(repo, "旧文字");
-  const snapshot = repo.stats("a", Filters.parse({}));
-  repo.enqueue("b", {
+  const snapshot = repo.transcripts.stats("a", Filters.parse({}));
+  repo.jobs.enqueue("b", {
     sourceId: source,
     recordedAt: 100000,
     audioUrl,
     mode: "rich",
   });
-  repo.complete(repo.claim()!, normalize(raw("其他人", 0)));
-  repo.enqueue("a", {
+  repo.jobs.complete(repo.jobs.claim()!, normalize(raw("其他人", 0)));
+  repo.jobs.enqueue("a", {
     sourceId: "b".repeat(64),
     recordedAt: 100000,
     audioUrl,
@@ -294,17 +310,17 @@ test("retranscription replaces affected sources and rolls back invalid output", 
       { sourceId: source, recordedAt: 100000, offsetMs: 0, durationMs: 1000 },
     ],
   });
-  repo.complete(repo.claim()!, normalize(raw("新结果", 0)));
-  assert.equal(repo.stats("a", Filters.parse({})).charCount, 3);
-  assert.equal(repo.stats("b", Filters.parse({})).charCount, 3);
+  repo.jobs.complete(repo.jobs.claim()!, normalize(raw("新结果", 0)));
+  assert.equal(repo.transcripts.stats("a", Filters.parse({})).charCount, 3);
+  assert.equal(repo.transcripts.stats("b", Filters.parse({})).charCount, 3);
   assert.equal(
-    repo
+    repo.transcripts
       .read("a", Filters.parse({}), 0, 2000, 100)
       .items.map((r) => r.word.text)
       .join(""),
     "新结果",
   );
-  repo.enqueue("a", {
+  repo.jobs.enqueue("a", {
     sourceId: "c".repeat(64),
     recordedAt: 100000,
     audioUrl,
@@ -315,12 +331,12 @@ test("retranscription replaces affected sources and rolls back invalid output", 
   });
   assert.throws(
     () =>
-      repo.complete(repo.claim()!, [
+      repo.jobs.complete(repo.jobs.claim()!, [
         { ...normalize(raw("错字", 0))[0], startMs: 2000, endMs: 2500 },
       ]),
     /TIMESTAMP_OUTSIDE/,
   );
-  assert.equal(repo.stats("a", Filters.parse({})).charCount, 3);
+  assert.equal(repo.transcripts.stats("a", Filters.parse({})).charCount, 3);
   repo.db.close();
 });
 
@@ -341,7 +357,7 @@ test("transient result-query failures retry the same task without a second paid 
     },
     finish: (r) => r.transcription as any,
   };
-  repo.enqueue("a", {
+  repo.jobs.enqueue("a", {
     sourceId: source,
     recordedAt: 100000,
     audioUrl,
@@ -372,7 +388,7 @@ test("persistent result-query failures stop after bounded retries without resubm
       throw new TypeError("fetch failed");
     },
   };
-  repo.enqueue("a", {
+  repo.jobs.enqueue("a", {
     sourceId: source,
     recordedAt: 1,
     audioUrl,

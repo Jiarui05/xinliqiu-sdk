@@ -2,15 +2,18 @@
 import { serve } from "@hono/node-server";
 import { mkdirSync, chmodSync } from "node:fs";
 import { join } from "node:path";
-import { Repository } from "./repository.js";
+import { Repository } from "./infrastructure/database.js";
 import { createApp } from "./app.js";
-import { DashScope } from "./provider.js";
-import { TranscriptionConfigs } from "./transcription-config.js";
-import { VoiceReferences, cosReferenceStorage } from "./voice-reference.js";
-import { configuredProvider } from "./cloud-transcription.js";
-import { tosReferenceStorage } from "./tos-storage.js";
-import { batchingStatus } from "./hourly-policy.js";
-import { tick } from "./worker.js";
+import { DashScope } from "./modules/transcription-jobs/providers/qwen.js";
+import { TranscriptionConfigs } from "./modules/provider-settings/service.js";
+import {
+  VoiceReferences,
+  cosReferenceStorage,
+} from "./modules/voice-identity/service.js";
+import { configuredProvider } from "./modules/transcription-jobs/providers/registry.js";
+import { tosReferenceStorage } from "./infrastructure/storage/tos.js";
+import { batchingStatus } from "./modules/transcription-jobs/hourly-policy.js";
+import { tick } from "./modules/transcription-jobs/worker.js";
 const folder = process.env.XQ_DATA_DIR ?? ".data";
 mkdirSync(folder, { recursive: true, mode: 0o700 });
 chmodSync(folder, 0o700);

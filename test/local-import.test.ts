@@ -8,9 +8,9 @@ import {
   mappedWords,
   validateSources,
   type JobInput,
-} from "../src/job-input.js";
-import { temporaryUpload } from "../src/temporary-upload.js";
-import { DashScope } from "../src/provider.js";
+} from "../src/modules/transcription-jobs/domain.js";
+import { temporaryUpload } from "../src/infrastructure/storage/temporary-upload.js";
+import { DashScope } from "../src/modules/transcription-jobs/providers/qwen.js";
 const sources = [
   { sourceId: "a".repeat(64), recordedAt: 1000, offsetMs: 0, durationMs: 1000 },
   {
@@ -135,9 +135,9 @@ test("each ASR pass selects its own temporary URL and enables resolver", async (
 });
 
 test("concurrent workers keep source clocks when publishing a batch", async () => {
-  const { Repository } = await import("../src/repository.js");
+  const { Repository } = await import("../src/infrastructure/database.js");
   const { Filters } = await import("../src/contracts.js");
-  const { tick } = await import("../src/worker.js");
+  const { tick } = await import("../src/modules/transcription-jobs/worker.js");
   const repo = new Repository(":memory:");
   const input: JobInput = {
     sourceId: "e".repeat(64),
@@ -146,7 +146,7 @@ test("concurrent workers keep source clocks when publishing a batch", async () =
     mode: "emotion",
     sources,
   };
-  repo.enqueue("local", input);
+  repo.jobs.enqueue("local", input);
   let submissions = 0;
   const provider = {
     submit: async () => {
@@ -171,9 +171,12 @@ test("concurrent workers keep source clocks when publishing a batch", async () =
   };
   await Promise.all([tick(repo, provider), tick(repo, provider)]);
   assert.equal(submissions, 1);
-  const count = repo.stats("local", Filters.parse({ from: 9000, to: 10000 }));
+  const count = repo.transcripts.stats(
+    "local",
+    Filters.parse({ from: 9000, to: 10000 }),
+  );
   assert.equal(count.charCount, 1);
-  const page = repo.read(
+  const page = repo.transcripts.read(
     "local",
     Filters.parse({ from: 9000, to: 10000 }),
     0,

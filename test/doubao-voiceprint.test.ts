@@ -5,12 +5,12 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
-import { mappedWords } from "../src/job-input.js";
-import { DoubaoVoiceprints } from "../src/doubao-voiceprint.js";
+import { mappedWords } from "../src/modules/transcription-jobs/domain.js";
+import { DoubaoVoiceprints } from "../src/modules/voice-identity/enrollment.js";
 import {
   DoubaoTranscription,
   doubaoWords,
-} from "../src/cloud-transcription.js";
+} from "../src/modules/transcription-jobs/providers/registry.js";
 const voiceId = "1b4ff14e-76f0-4bba-9ddc-513078d6539b";
 test("identity mode uses standard ASR with private uploaded audio and a fixed voiceprint", async () => {
   const root = mkdtempSync(join(tmpdir(), "xq-identity-asr-"));

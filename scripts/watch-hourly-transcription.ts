@@ -16,9 +16,12 @@ import { fileURLToPath } from "node:url";
 import { spawn, type ChildProcess } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import YAML from "yaml";
-import { Repository } from "../src/repository.js";
-import { TranscriptionConfigs } from "../src/transcription-config.js";
-import { HOURLY_AUDIO_MS, pendingAudioMs } from "../src/hourly-policy.js";
+import { Repository } from "../src/infrastructure/database.js";
+import { TranscriptionConfigs } from "../src/modules/provider-settings/service.js";
+import {
+  HOURLY_AUDIO_MS,
+  pendingAudioMs,
+} from "../src/modules/transcription-jobs/hourly-policy.js";
 const data = process.env.XQ_DATA_DIR;
 if (!data) throw Error("DATA_DIR_REQUIRED");
 process.umask(0o077);

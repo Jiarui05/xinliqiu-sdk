@@ -14,20 +14,20 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { Repository } from "../src/repository.js";
+import { Repository } from "../src/infrastructure/database.js";
 import { createApp } from "../src/app.js";
 const exec = promisify(execFile);
 test("portable install, authenticated read, schema, skill, update and checksum rollback", async () => {
   const repo = new Repository(":memory:"),
     token = "synthetic-portable-cli-root-token-123456789";
-  repo.token(token, "local");
-  repo.enqueue("local", {
+  repo.auth.token(token, "local");
+  repo.jobs.enqueue("local", {
     sourceId: "a".repeat(64),
     recordedAt: 1000,
     audioUrl: "https://example.test/a.wav",
     mode: "emotion",
   });
-  repo.complete(repo.claim()!, [
+  repo.jobs.complete(repo.jobs.claim()!, [
     {
       text: "测试",
       startMs: 0,
